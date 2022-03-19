@@ -1,0 +1,25 @@
+{
+  "name": "minecraft-sphere",
+  "private": true,
+  "version": "0.0.0",
+  "main": "dist/minecraft-sphere.es.js",
+  "exports": {
+    ".": "./dist/minecraft-sphere.es.js"
+  },
+  "types": "types/minecraft-sphere.d.ts",
+  "files": [
+    "dist",
+    "types"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build"
+  },
+  "dependencies": {
+    "lit": "^2.0.2"
+  },
+  "devDependencies": {
+    "vite": "^2.8.0",
+    "typescript": "^4.5.4"
+  }
+}
