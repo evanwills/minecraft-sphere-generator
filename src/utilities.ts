@@ -21,8 +21,12 @@ export const ucFirst = (input : string) : string => {
  *
  * @returns positive version of that number
  */
-  export const makePos = (input : number) : number => {
+export const makePos = (input : number) : number => {
   return (input < 0)
     ? input *= -1
     : input
+}
+
+export const normalise = (input : string) : string => {
+  return input.replace(/[^a-z0-9 ]+/ig, ' ').toLowerCase().trim();
 }

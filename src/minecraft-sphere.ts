@@ -2,7 +2,7 @@ import { html, css, LitElement, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { IBlockType, ICoodinates, IOneOffCmds, IRotation, IWarnings } from './minecraft-sphere.d';
-import { ucFirst, makePos } from './utilities';
+import { ucFirst, makePos, normalise } from './utilities';
 
 
 // block list source V1.16:
@@ -745,72 +745,21 @@ export class MinecraftSphere extends LitElement {
       font-family: inherit;
       color: inherit;
       background-color: inherit;
+      box-sizing: border-box;
+
+      --font-size: 16px;
+      --timing: 0.4s;
+      --ease: ease-in-out;
+      --line-weight: 0.05rem;
+      --line-weight-hvy: .1rem;
+      --line-weight-hvy: 0.1rem;
+      --txt-colour: #fff;
+      --bg-colour: #2d2b2b;
       --h-font: Arial, Helvetica, sans-serif;
     }
 
     h1, h2, h3, h4, h5, h6 {
       font-family: var(--h-font);
-    }
-    .cb-btn__label {
-      display: block;
-      border: var(--line-weight-hvy) solid var(--txt-colour);
-      max-width: 24rem;
-      padding: 0.2rem 1.75rem;
-      position: relative;
-      text-align: center;
-    }
-    .cb-btn__label--centre {
-      margin: 0.1rem auto;
-    }
-    .cb-btn__label--badge::before {
-      border: var(--line-weight-hvy) solid var(--txt-colour);
-      border-radius: 50%;
-      color: var(--txt-colour);
-      content: "\02717";
-      display: inline-block;
-      font-size: 0.86rem;
-      height: 1em;
-      left: 0.35rem;
-      line-height: 1;
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 1em;
-    }
-    .cb-btn__label--star::before {
-      content: "\02605" !important;
-    }
-    .cb-btn__label--heart::before {
-      content: "\02665" !important;
-    }
-    .cb-btn__label--search::before {
-      content: "\02315" !important;
-    }
-    .cb-btn__label--target::before {
-      content: "\02316" !important;
-    }
-    .cb-btn__label:hover {
-      cursor: pointer;
-    }
-    .cb-btn__input {
-      display: inline-block;
-      position: absolute;
-      opacity: 0;
-      margin-right: -1rem;
-      margin-bottom: -1rem;
-    }
-    .cb-btn__input:checked + .cb-btn__label {
-      background-color: var(--txt-colour);
-      color: var(--bg-colour);
-    }
-    .cb-btn__input:checked + .cb-btn__label--badge::before {
-      background-color: var(--bg-colour);
-      border-color: var(--bg-colour);
-      color: var(--txt-colour);
-      content: "\02713";
-    }
-    .cb-btn__input:focus + .cb-btn__label {
-      outline: 0.15rem dotted var(--txt-colour);
     }
 
     .radio-grp__items {
@@ -820,6 +769,7 @@ export class MinecraftSphere extends LitElement {
       align-content: stretch;
       border: var(--line-weight-hvy) solid var(--txt-colour);
       border-radius: 1em;
+      box-sizing: border-box;
       justify-content: space-between;
       margin: 0.5em 0;
       overflow: hidden;
@@ -834,9 +784,11 @@ export class MinecraftSphere extends LitElement {
         border-radius: 2rem;
       }
     }
-
     .radio-grp__items > li {
       flex-grow: 1;
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
     }
     .radio-grp__label {
       /* background-color: var(--bg-colour);
@@ -844,19 +796,18 @@ export class MinecraftSphere extends LitElement {
       border-radius: 2em;
       display: inline-block;
       margin: 0 -0.25em;
-      padding: 0.3rem 2em;
+      padding: 0.2rem 0 0.2rem 2em;
       position: relative;
       text-align: center;
       transition: color var(--ease) var(--timing) background-color var(--ease) var(--timing);
-      width: calc(100% + .5rem);
-      height: 100%;
+      width: calc(100% - 1rem);
     }
     .radio-grp__label::after {
       background-color: var(--bg-colour);
       border: var(--line-weight-hvy) solid var(--bg-colour);
       border-radius: 50%;
       color: var(--txt-colour);
-      content: "\02713";
+      content: "\\02713";
       display: inline-block;
       font-size: 0.86em;
       height: 1.25em;
@@ -868,6 +819,9 @@ export class MinecraftSphere extends LitElement {
       transform: translateY(-50%);
       transition: opacity var(--ease) var(--timing);
       width: 1.25em;
+    }
+    li:first-child .radio-grp__label::after {
+      left: 0.45rem;
     }
 
     .radio-grp :first-child .radio-grp__label {
@@ -894,14 +848,96 @@ export class MinecraftSphere extends LitElement {
       color: var(--bg-colour);
       background-color: var(--txt-colour);
       padding-left: 2.5em;
-      width: calc(100% + .5rem);
       /* width: 100%; */
       z-index: 1;
     }
     .radio-grp__input:checked + .radio-grp__label::after {
       opacity: 1;
     }
-
+    .cb-btn__label {
+      display: block;
+      border: var(--line-weight-hvy) solid var(--txt-colour);
+      max-width: 24rem;
+      padding: 0.2rem 1.75rem;
+      position: relative;
+      text-align: center;
+    }
+    .cb-btn__label--centre {
+      margin: 0.1rem auto;
+    }
+    .cb-btn__label--badge::before {
+      border: var(--line-weight-hvy) solid var(--txt-colour);
+      border-radius: 50%;
+      color: var(--txt-colour);
+      content: "\\02717";
+      display: inline-block;
+      font-size: 0.86rem;
+      height: 1em;
+      left: 0.35rem;
+      line-height: 1;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1em;
+    }
+    .cb-btn__label--star::before {
+      content: "\\02605" !important;
+    }
+    .cb-btn__label--heart::before {
+      content: "\\02665" !important;
+    }
+    .cb-btn__label--search::before {
+      content: "\\02315" !important;
+    }
+    .cb-btn__label--target::before {
+      content: "\\02316" !important;
+    }
+    .cb-btn__label:hover {
+      cursor: pointer;
+    }
+    .cb-btn__input {
+      display: inline-block;
+      position: absolute;
+      opacity: 0;
+      margin-right: -1rem;
+      margin-bottom: -1rem;
+    }
+    .cb-btn__input:checked + .cb-btn__label {
+      background-color: var(--txt-colour);
+      color: var(--bg-colour);
+    }
+    .cb-btn__input:checked + .cb-btn__label--badge::before {
+      background-color: var(--bg-colour);
+      border-color: var(--bg-colour);
+      color: var(--txt-colour);
+      content: "\\02713";
+    }
+    .cb-btn__input:focus + .cb-btn__label {
+      outline: 0.15rem dotted var(--txt-colour);
+    }
+    .list-clean {
+      margin: 0;
+      padding: 0;
+    }
+    .alert {
+      padding: 0.5rem;
+      margin: 1.5rem 0 0.5rem;
+    }
+    .alert-warn {
+      background-color: #eedb90;
+      color: #000;
+    }
+    textarea {
+      display: block;
+      width: 100%;
+      height: 22rem;
+      background-color: var(--bg-colour);
+      color: var(--txt-colour);
+      padding: 0.5rem;
+      border: var(--line-weight) solid var(--txt-colour);
+      box-sizing: border-box;
+      font-family: 'Courier New', Courier, monospace;
+    }
   `
 
 
@@ -1046,10 +1082,18 @@ export class MinecraftSphere extends LitElement {
   }
 
   private _init() : void {
+    console.group('_init()')
     if (this._doInit) {
+      console.log('doing INIT');
+      console.log('this.blockTypeLabel:', this.blockTypeLabel)
       this._doInit = false;
       this._doSphere = (this.outputMode !== 3);
+      this._setWarnings();
+      if (this.blockTypeLabel !== '') {
+        this._filterBlockListInner(this.blockTypeLabel);
+      }
     }
+    console.groupEnd()
   }
 
   private _canGenerate() : boolean {
@@ -1138,33 +1182,38 @@ export class MinecraftSphere extends LitElement {
      */
     const input = e.target as HTMLInputElement;
 
-    const value = input.value.replace(/[^a-z0-9 ]+/ig, ' ').toLowerCase().trim();
+    const value = normalise(input.value);
 
-    const filtered = mineCraftBlocks.filter(item => (item.norm.indexOf(value) > -1));
+    input.value = this._filterBlockListInner(value);
+  }
 
-    this._filteredBlocks = filtered;
+  private _filterBlockListInner(value : string) : string {
+    const _value = normalise(value);
+    const filtered = mineCraftBlocks.filter(item => (item.norm.indexOf(_value) > -1));
 
+    let output = value;
     let l = filtered.length;
-    console.group('filterBlockList()');
+
 
     if (l === 1) {
       this.blockTypeLabel = filtered[0].label;
       this.blockTypeID = filtered[0].id;
       this._filteredBlocks = [];
-      input.value = filtered[0].label;
-      console.info('Only one block matches', )
+
+      output = filtered[0].label;
     } else if (l < 40) {
-      const tmp = filtered.filter(item => item.norm === value);
+      const tmp = filtered.filter(item => item.norm === _value);
 
       if (tmp.length === 1) {
         this.blockTypeLabel = tmp[0].label;
         this.blockTypeID = tmp[0].id;
-      } else {
-        console.log('match count:', filtered.length)
       }
     }
-    console.groupEnd();
+
+    this._filteredBlocks = filtered;
+    return output;
   }
+
 
   /**
    * Handle general user initiated changes & clicks
@@ -1240,16 +1289,18 @@ export class MinecraftSphere extends LitElement {
     if (l === 0) {
       return '';
     } else if (l === 1) {
-      return html`<p class="alert alert-warn">${msgs[0]}</p>`;
+      return (msgs[0] !== '')
+        ? html`<p class="alert alert-warn">${msgs[0]}</p>`
+        : '';
     } else {
       return html`
         <div class="alert alert-warn">
           <ul>
             ${repeat(
               msgs,
-              item => item.substring(0, 1),
+              item => item.substring(0, 2),
               item => html`
-                <li>${item.substring(1, 200)}</li>
+                <li>${item.substring(2, 200)}</li>
               `
             )}
           </ul>
@@ -1268,7 +1319,15 @@ export class MinecraftSphere extends LitElement {
           </button>`
       : '';
     let override = (this._warningCount > 0)
-      ? html`<input type="checkbox" id="ignore-warnings" @change=${this.changeHandler} ?checked=${this.ignoreWarnings} /> <label for="ignore-warnings">Ignore warnings</label>`
+      ? html`
+      <ul class="list-clean checkable-grp__items checkbox-grp__items">
+        <li>
+          <input type="checkbox" id="ignore-warnings" @change=${this.changeHandler} ?checked=${this.ignoreWarnings} class="cb-btn__input" />
+          <label for="ignore-warnings" class="cb-btn__label cb-btn__label--badge">Ignore warnings</label>
+        </li>
+      </ul>
+        `
+
       : '';
     const tmp = (this.radius - this._rMin - 1);
 
@@ -1289,7 +1348,8 @@ export class MinecraftSphere extends LitElement {
                         ?checked="${this._doSphere}"
                         @change=${this.changeHandler}
                         class="radio-grp__input" />
-                  <label for="object-type-sphere">Sphere</label>
+                  <label for="object-type-sphere"
+                        class="radio-grp__label">Sphere</label>
                 </li>
                 <li>
                   <input type="radio"
@@ -1299,7 +1359,8 @@ export class MinecraftSphere extends LitElement {
                         ?checked="${!this._doSphere}"
                         @change=${this.changeHandler}
                         class="radio-grp__input" />
-                  <label for="object-type-cylinder">Cylinder</label>
+                  <label for="object-type-cylinder"
+                        class="radio-grp__label">Cylinder</label>
                 </li>
               </ul>
             </div>
