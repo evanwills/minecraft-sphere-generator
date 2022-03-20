@@ -15,8 +15,24 @@ export interface IWarnings {
   radius: Array<string>,
   x: string,
   y: string,
-  z: string
+  z: string,
+  thickness: string
 }
 
+export interface ICoodinates {
+  x: number,
+  y: number,
+  z: number
+}
+
+export interface IOneOffCmds {
+  first: Array<string>,
+  last: Array<string>
+}
+
+export interface IRotation {
+  horizontal: number,
+  vertical: number
+}
 
 export type FHandler = (e: Event) => void;

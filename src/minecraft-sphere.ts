@@ -1,17 +1,8 @@
 import { html, css, LitElement, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-import { IBlockType, FHandler, IWarnings } from './minecraft-sphere.d';
-// import { IBlockTypes } from 'vite-env.d';
-
-
-
-// interface IBlockType {
-//   key: string,
-//   label: string,
-//   norm: string
-// }
-
+import { IBlockType, ICoodinates, IOneOffCmds, IRotation, IWarnings } from './minecraft-sphere.d';
+import { ucFirst, makePos } from './utilities';
 
 
 // block list source V1.16:
@@ -627,6 +618,18 @@ const mineCraftBlocks : Array<IBlockType> = [
 @customElement('minecraft-sphere')
 export class MinecraftSphere extends LitElement {
   /**
+   * The radius of the sphere/cylinder
+   */
+  @property({ reflect: true, type: Number })
+  radius : number = 0;
+
+  /**
+   * Thickness of the wall of the sphere/cylinder
+   */
+  @property({ reflect: true, type: Number })
+  thickness : number = 1;
+
+  /**
    * The human readable label for the block type to be used to build
    * the sphere
    */
@@ -637,12 +640,6 @@ export class MinecraftSphere extends LitElement {
    */
   @property({ reflect: true, type: String })
   blockTypeID : string = '';
-
-  /**
-   * The radius of the sphere
-   */
-  @property({ reflect: true, type: Number })
-  radius : number = 0;
 
   /**
    * East/West coordinate for the centre of the sphere
@@ -699,10 +696,10 @@ export class MinecraftSphere extends LitElement {
   ignoreWarnings : boolean = false;
 
   /**
-   * The number of times the button has been clicked.
+   * The type of object to be created.
    */
   @property({ reflect: true, type: String })
-  warningMsg : string = '';
+  objecType : string = 'sphere';
 
   // ================================================================
   // START: Private poperties & state
@@ -713,11 +710,21 @@ export class MinecraftSphere extends LitElement {
     radius: [],
     x: '',
     y: '',
-    z: ''
+    z: '',
+    thickness: ''
   };
 
   @state()
+  public radiusError : string = '';
+
+  @state()
+  public thicknessError : string = '';
+
+  @state()
   private _warningCount : number = 0;
+
+  @state()
+  private _errorCount : number = 0;
 
   @state()
   private _showCode : boolean = false;
@@ -744,37 +751,173 @@ export class MinecraftSphere extends LitElement {
     h1, h2, h3, h4, h5, h6 {
       font-family: var(--h-font);
     }
+    .cb-btn__label {
+      display: block;
+      border: var(--line-weight-hvy) solid var(--txt-colour);
+      max-width: 24rem;
+      padding: 0.2rem 1.75rem;
+      position: relative;
+      text-align: center;
+    }
+    .cb-btn__label--centre {
+      margin: 0.1rem auto;
+    }
+    .cb-btn__label--badge::before {
+      border: var(--line-weight-hvy) solid var(--txt-colour);
+      border-radius: 50%;
+      color: var(--txt-colour);
+      content: "\02717";
+      display: inline-block;
+      font-size: 0.86rem;
+      height: 1em;
+      left: 0.35rem;
+      line-height: 1;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1em;
+    }
+    .cb-btn__label--star::before {
+      content: "\02605" !important;
+    }
+    .cb-btn__label--heart::before {
+      content: "\02665" !important;
+    }
+    .cb-btn__label--search::before {
+      content: "\02315" !important;
+    }
+    .cb-btn__label--target::before {
+      content: "\02316" !important;
+    }
+    .cb-btn__label:hover {
+      cursor: pointer;
+    }
+    .cb-btn__input {
+      display: inline-block;
+      position: absolute;
+      opacity: 0;
+      margin-right: -1rem;
+      margin-bottom: -1rem;
+    }
+    .cb-btn__input:checked + .cb-btn__label {
+      background-color: var(--txt-colour);
+      color: var(--bg-colour);
+    }
+    .cb-btn__input:checked + .cb-btn__label--badge::before {
+      background-color: var(--bg-colour);
+      border-color: var(--bg-colour);
+      color: var(--txt-colour);
+      content: "\02713";
+    }
+    .cb-btn__input:focus + .cb-btn__label {
+      outline: 0.15rem dotted var(--txt-colour);
+    }
+
+    .radio-grp__items {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      align-content: stretch;
+      border: var(--line-weight-hvy) solid var(--txt-colour);
+      border-radius: 1em;
+      justify-content: space-between;
+      margin: 0.5em 0;
+      overflow: hidden;
+      padding: 0.1rem 0.3rem;
+      position: relative;
+    }
+
+    @media screen and (min-width: 35rem) {
+      .radio-grp__items {
+        flex-direction: row;
+        padding: 0;
+        border-radius: 2rem;
+      }
+    }
+
+    .radio-grp__items > li {
+      flex-grow: 1;
+    }
+    .radio-grp__label {
+      /* background-color: var(--bg-colour);
+      color: var(--txt-colour); */
+      border-radius: 2em;
+      display: inline-block;
+      margin: 0 -0.25em;
+      padding: 0.3rem 2em;
+      position: relative;
+      text-align: center;
+      transition: color var(--ease) var(--timing) background-color var(--ease) var(--timing);
+      width: calc(100% + .5rem);
+      height: 100%;
+    }
+    .radio-grp__label::after {
+      background-color: var(--bg-colour);
+      border: var(--line-weight-hvy) solid var(--bg-colour);
+      border-radius: 50%;
+      color: var(--txt-colour);
+      content: "\02713";
+      display: inline-block;
+      font-size: 0.86em;
+      height: 1.25em;
+      left: 0.35em;
+      line-height: 1.25;
+      opacity: 0;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      transition: opacity var(--ease) var(--timing);
+      width: 1.25em;
+    }
+
+    .radio-grp :first-child .radio-grp__label {
+      margin-left: 0;
+    }
+    .radio-grp :last-child .radio-grp__label {
+      margin-right: 0;
+    }
+    .radio-grp__h {
+      margin: 0;
+    }
+    .radio-grp__input {
+      display: inline-block;
+      opacity: 0;
+      height: 1px;
+      width: 1px;
+      margin-left: -1px;
+      z-index: -1;
+      position: absolute;
+      top: -10em;
+      left: -10em;
+    }
+    .radio-grp__input:checked + .radio-grp__label {
+      color: var(--bg-colour);
+      background-color: var(--txt-colour);
+      padding-left: 2.5em;
+      width: calc(100% + .5rem);
+      /* width: 100%; */
+      z-index: 1;
+    }
+    .radio-grp__input:checked + .radio-grp__label::after {
+      opacity: 1;
+    }
+
   `
 
 
   // ================================================================
   // START: general helper methods
 
-  /**
-   * Make sure a number is positive so it can be compared with a
-   * known positive number
-   *
-   * @param input user supplied number
-   *
-   * @returns positive version of that number
-   */
-  private _makePos(input : number) : number {
-    return (input < 0)
-      ? input *= -1
-      : input
-  }
 
   /**
    * Set warning messages generated by user inputs being outside of
    * acceptable limits
    */
   private _setWarnings() : void {
-    const obj = (this._doSphere === true)
-      ? 'sphere'
-      : 'cylinder'
-    const x = this._makePos(this.centreX)
-    const y = this._makePos(this.centreY)
-    const z = this._makePos(this.centreZ)
+    const obj = this.objecType
+    const x = makePos(this.centreX)
+    const y = makePos(this.centreY)
+    const z = makePos(this.centreZ)
     const _tail = 'that some part of the ' + obj + ' will be outside ' +
                   'the world.';
     const _pre =  'You should adjust the ';
@@ -782,28 +925,56 @@ export class MinecraftSphere extends LitElement {
                   'the world.'
     let _tmp = '';
     let _point = '';
+    let _gID = 0;
+    let _rID = 0;
+    let _eCount = 0;
+
+    const _getGid = () : string => {
+      _gID += 1;
+      return _gID.toString() + '.'
+    }
+    const _getRid = () : string => {
+      _rID += 1;
+      return _rID.toString() + '.'
+    }
+
+    this._warningMsgs = {
+      general: [],
+      radius: [],
+      x: '',
+      y: '',
+      z: '',
+      thickness: ''
+    };
 
     if (this._doSphere === true) {
       if (this.radius > 75) {
         this._warningMsgs.radius.push(
-          'a.A sphere this big may be very slow to render'
+          _getGid() + 'A sphere this big may be very slow to render'
         );
       }
       if (this.radius > this.vMax) {
         _tmp = 'The radius is so large' + _tail;
-        this._warningMsgs.radius.push(_tmp);
-        this._warningMsgs.general.push('b.' + _tmp);
+        this._warningMsgs.radius.push(_getRid() + _tmp);
+        this._warningMsgs.general.push(_getGid() + _tmp);
       } else if (this.radius + z > this.vMax) {
         this._warningMsgs.general.push(
-          'c.The combination of the radius and ' +
+          _getGid() + 'The combination of the radius and ' +
           'vertical position means' + _tail
         );
         this._warningMsgs.radius.push(
-          _pre + 'radius or vertical position' + _post
+          _getRid() + _pre + 'radius or vertical position' + _post
         );
         this._warningMsgs.z = _pre + 'vertical position or radius' +
                               _post;
       }
+    } else if (this.radius < this._rMin) {
+      _tmp = 'You must have a place to stand while generating the ' +
+             obj + '. Your radius is too small to guarantee you ' +
+             'have a space to stand.';
+      this.radiusError = _tmp;
+      this._warningMsgs.general.push(_getGid() + _tmp);
+      _eCount += 1
     }
 
     _point = (x > 0)
@@ -814,18 +985,18 @@ export class MinecraftSphere extends LitElement {
              'stern boundary of the world. At least half of the ' +
              'sphere will be outside the world'
       this._warningMsgs.z = _tmp;
-      this._warningMsgs.general.push('d.' + _tmp)
+      this._warningMsgs.general.push(_getGid() + _tmp)
     } else if (this.radius + x > this.hMax) {
       _tmp = _tail.replace(
         'outside',
         'beyond the ' + _point + 'stern boundary of'
       );
       this._warningMsgs.general.push(
-        'e.The combination of the radius and east/west position ' +
-        'means' + _tmp
+        _getGid() + 'The combination of the radius and east/west ' +
+        'position means' + _tmp
       );
       this._warningMsgs.radius.push(
-        _pre + 'radius or east/west position' + _post
+        _getRid() + _pre + 'radius or east/west position' + _post
       );
       this._warningMsgs.z = _pre + 'east/west position or radius' +
                             _post;
@@ -839,24 +1010,39 @@ export class MinecraftSphere extends LitElement {
              'thern boundary of the world. At least half of the ' +
              'sphere will be outside the world'
       this._warningMsgs.z = _tmp;
-      this._warningMsgs.general.push('f.' + _tmp)
+      this._warningMsgs.general.push(_getGid() + _tmp)
     } else if (this.radius + x > this.hMax) {
       _tmp = _tail.replace(
         'outside',
         'beyond the ' + _point + 'thern boundary of'
       );
       this._warningMsgs.general.push(
-        'g.The combination of the radius and north/south position ' +
+        _getGid() + 'The combination of the radius and north/south position ' +
         'means' + _tmp
       );
       this._warningMsgs.radius.push(
-        _pre + 'radius or north/south position' + _post
+        _getRid() + _pre + 'radius or north/south position' + _post
       );
       this._warningMsgs.z = _pre + 'north/south position or radius' +
                             _post;
     }
 
+    if (this.thickness > 1 && this.thickness >= this.radius - this._rMin) {
+      _tmp = 'You must have a place to stand while generating the ' +
+             obj + '. Your thickness is too large to guarantee ' +
+             'you have a space to stand.';
+      this.thicknessError = _tmp;
+      this._warningMsgs.general.push(_getGid() + _tmp);
+    } else if (this.thickness < 1) {
+      _tmp = 'The thickness of the ' + obj + ' must be at least 1 block';
+      this.thicknessError = _tmp;
+      this._warningMsgs.general.push(_getGid() + _tmp);
+      _eCount += 1;
+    }
+
+
     this._warningCount = this._warningMsgs.general.length;
+    this._errorCount = _eCount;
   }
 
   private _init() : void {
@@ -868,7 +1054,72 @@ export class MinecraftSphere extends LitElement {
 
   private _canGenerate() : boolean {
     return (this.radius >= this._rMin && this.blockTypeID !== '' &&
-    (this._warningCount === 0) || this.ignoreWarnings === true)
+            this._errorCount === 0 &&
+           (this._warningCount === 0 || this.ignoreWarnings === true))
+  }
+
+  private _getRotation(radius : number, thickness : number) : IRotation {
+    const horizontal = (Math.floor(((50 / radius) / thickness) * 10000) / 10000);
+
+    return {
+      horizontal: horizontal,
+      vertical: (Math.floor(((horizontal * horizontal) / 360) * 10000)/10000)
+    };
+  }
+
+  private _coordStr(coordinates : ICoodinates) : string {
+    return coordinates.x + ' ' + coordinates.z + ' ' + coordinates.y
+  }
+
+  private _generateSetBlocks(
+    firstBlock : ICoodinates,
+    commands : Array<string>,
+    totalRepeats : number,
+    oneoffs : IOneOffCmds = { first: [], last: [] }
+  ) : string {
+    let output = '';
+
+    // for (let a = 0, c = commands.length; a < c; a += 1) {
+    // }
+    for (let a = 0, c = commands.length; a < c; a += 1) {
+      output += commands[a] + '\n';
+    }
+    return output;
+  }
+
+  private _generateSphere(
+    centre : ICoodinates,
+    radius : number,
+    thickness : number,
+    blockTypeID : string
+  ) : string {
+    const rotation = this._getRotation(radius, thickness);
+    let output = '';
+    const cmds : Array<string> = [
+      '/execute at @p run setblock ^ ^ ^' + radius + ' minecraft:' +
+      blockTypeID,
+      '/execute at @p run tp @p ' + this._coordStr(centre) + ' ~' +
+      rotation.horizontal + ' ~' + rotation.vertical + '\n'
+    ];
+    const firstBlock : ICoodinates = {
+      x: centre.x + radius / 2,
+      y: centre.y + radius / 2,
+      z: this.vMax - 3
+    }
+
+
+    return this._generateSetBlocks(firstBlock, cmds, 36);
+  }
+
+  private _generateCylinder(
+    centre : ICoodinates,
+    radius : number,
+    thickness : number,
+    blockTypeID : string
+  ) : string {
+    let output = '';
+
+    return output;
   }
 
   //  END:  general helper methods
@@ -928,8 +1179,8 @@ export class MinecraftSphere extends LitElement {
 
     switch (input.id) {
       case 'radius':
-        const tmp = this._makePos(val);
-        this.radius = tmp;
+
+        this.radius = makePos(val);
         changed = true;
         break;
 
@@ -948,6 +1199,11 @@ export class MinecraftSphere extends LitElement {
         changed = true;
         break;
 
+      case 'thickness':
+        this.thickness = makePos(val);
+        changed = true;
+        break;
+
       case 'ignore-warnings':
         this.ignoreWarnings = input.checked;
         break;
@@ -955,6 +1211,9 @@ export class MinecraftSphere extends LitElement {
       case 'object-type-sphere':
       case 'object-type-cylinder':
         this._doSphere = val === 1;
+        this.objecType = (this._doSphere)
+          ? 'sphere'
+          : 'cylinder';
         break;
 
       case 'generate':
@@ -998,6 +1257,7 @@ export class MinecraftSphere extends LitElement {
     }
   }
 
+
   renderInputs() : TemplateResult {
     let btn = (this._canGenerate())
       ? html`
@@ -1010,29 +1270,39 @@ export class MinecraftSphere extends LitElement {
     let override = (this._warningCount > 0)
       ? html`<input type="checkbox" id="ignore-warnings" @change=${this.changeHandler} ?checked=${this.ignoreWarnings} /> <label for="ignore-warnings">Ignore warnings</label>`
       : '';
+    const tmp = (this.radius - this._rMin - 1);
 
+    const obj : string = ucFirst(this.objecType);
     return html`
 
       ${this.renderWarnings(this._warningMsgs.general)}
       ${(this.outputMode === 1)
         ? html`
-          <p>
-              Object type:
-              <input type="radio"
-                     id="object-type-sphere"
-                     name="object-type"
-                     value="1"
-                    ?checked="${this._doSphere}"
-                    @change=${this.changeHandler} />
-              <label for="object-type-sphere">Sphere</label>
-              <input type="radio"
-                     id="object-type-cylinder"
-                     name="object-type"
-                     value="0"
-                    ?checked="${!this._doSphere}"
-                    @change=${this.changeHandler} />
-              <label for="object-type-cylinder">Cylinder</label>
-            </p>
+          <div class="checkable-grp__wrap radio-grp__wrapper">
+              <h3 id="object-type-label" class="checkable-grp__h radio-grp__h">Object type:</h2>
+              <ul class="list-clean list-clean--tight list-inline radio-grp__items">
+                <li>
+                  <input type="radio"
+                        id="object-type-sphere"
+                        name="object-type"
+                        value="1"
+                        ?checked="${this._doSphere}"
+                        @change=${this.changeHandler}
+                        class="radio-grp__input" />
+                  <label for="object-type-sphere">Sphere</label>
+                </li>
+                <li>
+                  <input type="radio"
+                        id="object-type-cylinder"
+                        name="object-type"
+                        value="0"
+                        ?checked="${!this._doSphere}"
+                        @change=${this.changeHandler}
+                        class="radio-grp__input" />
+                  <label for="object-type-cylinder">Cylinder</label>
+                </li>
+              </ul>
+            </div>
           `
         : ''
       }
@@ -1062,7 +1332,7 @@ export class MinecraftSphere extends LitElement {
       ${this.renderWarnings(this._warningMsgs.radius)}
 
       <p>
-        <label for="radius">Sphere radius:</label>
+        <label for="radius">${obj} radius:</label>
         <input type="number"
                id="radius"
                name="radius"
@@ -1072,7 +1342,18 @@ export class MinecraftSphere extends LitElement {
                step="1"
               @change=${this.changeHandler} />
       </p>
-      <h2>Sphere center coordinates</h2>
+      <p>
+        <label for="thickness">${obj} thickness:</label>
+        <input type="number"
+               id="thickness"
+               name="thickness"
+              .value="${this.thickness}"
+               min="1"
+               max="${(tmp > 1) ? tmp : 1}"
+               step="1"
+              @change=${this.changeHandler} />
+      </p>
+      <h2>${obj} center coordinates</h2>
       ${this.renderWarnings([this._warningMsgs.x])}
       <p>
         <label for="centreX">East/West:</label>
@@ -1117,7 +1398,26 @@ export class MinecraftSphere extends LitElement {
   }
 
   renderCode() : TemplateResult {
+    const _centre = {
+      x : this.centreX,
+      y: this.centreY,
+      z: this.centreZ};
+
     return html`
+      <textarea>${(this._doSphere)
+        ? this._generateSphere(
+            _centre,
+            this.radius,
+            this.thickness,
+            this.blockTypeID
+          )
+        : this._generateCylinder(
+            _centre,
+            this.radius,
+            this.thickness,
+            this.blockTypeID
+          )
+      }</textarea>
       <button id="modify"
               value="1"
              @click=${this.changeHandler}>
