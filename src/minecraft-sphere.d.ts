@@ -22,12 +22,13 @@ export interface IWarnings {
 export interface ICoodinates {
   x: number,
   y: number,
-  z: number
+  z: number|string
 }
 
 export interface IOneOffCmds {
   first: Array<string>,
-  last: Array<string>
+  last: Array<string>,
+  end: string
 }
 
 export interface IRotation {

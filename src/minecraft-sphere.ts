@@ -2,7 +2,7 @@ import { html, css, LitElement, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { IBlockType, ICoodinates, IOneOffCmds, IRotation, IWarnings } from './minecraft-sphere.d';
-import { ucFirst, makePos, normalise } from './utilities';
+import { ucFirst, makePos, normalise, coordStr } from './utilities';
 
 
 // block list source V1.16:
@@ -630,6 +630,12 @@ export class MinecraftSphere extends LitElement {
   thickness : number = 1;
 
   /**
+   * The height of a cylinder
+   */
+  @property({ reflect: true, type: Number })
+  height : number = 1;
+
+  /**
    * The human readable label for the block type to be used to build
    * the sphere
    */
@@ -694,6 +700,12 @@ export class MinecraftSphere extends LitElement {
    */
   @property({ type: Boolean })
   ignoreWarnings : boolean = false;
+
+  /**
+   * Whether or not to show extra comments in output
+   */
+  @property({ type: Boolean })
+  showExtraComments : boolean = false;
 
   /**
    * The type of object to be created.
@@ -1081,6 +1093,12 @@ export class MinecraftSphere extends LitElement {
     this._errorCount = _eCount;
   }
 
+  /**
+   * Do basic initialisation stuff...
+   *
+   * Mostly validating attribute values and doing anything that would
+   * normally be triggered by user input
+   */
   private _init() : void {
     console.group('_init()')
     if (this._doInit) {
@@ -1096,63 +1114,203 @@ export class MinecraftSphere extends LitElement {
     console.groupEnd()
   }
 
+  /**
+   * Check whether or not it's OK to generate output code
+   *
+   * @return TRUE if it's OK to generate code. FALSE otherwise
+   */
   private _canGenerate() : boolean {
     return (this.radius >= this._rMin && this.blockTypeID !== '' &&
             this._errorCount === 0 &&
            (this._warningCount === 0 || this.ignoreWarnings === true))
   }
 
-  private _getRotation(radius : number, thickness : number) : IRotation {
-    const horizontal = (Math.floor(((50 / radius) / thickness) * 10000) / 10000);
-
+  private _showCmnt(
+    input: string, output: string, chain: string = ''
+  ) : { cmd: string, chain: string } {
+    let tmp = '';
+    let _chain = chain;
+    if (input.substring(0, 3) === '// ') {
+      if (this.showExtraComments) {
+        tmp = '\n' + input + '\n'
+      }
+    } else {
+      tmp = output.replace('[[CMD]]', input);
+      _chain = 'chain_'
+    }
     return {
-      horizontal: horizontal,
-      vertical: (Math.floor(((horizontal * horizontal) / 360) * 10000)/10000)
-    };
+      cmd: tmp,
+      chain: _chain
+    }
   }
 
-  private _coordStr(coordinates : ICoodinates) : string {
-    return coordinates.x + ' ' + coordinates.z + ' ' + coordinates.y
+  /**
+   * Get the horizontal & vertical rotion angles
+   *
+   * @param {number}  radius The radius of the sphere/cylinder
+   * @param {boolean} floor  Whether or not to use floor or ceil to
+   *                         round the output values
+   *
+   * @returns {IRotation} The horizontal & vertical rotations to use
+   *                      after setting every (inner) block
+   */
+  private _getRotation(radius : number, floor: boolean = true) : IRotation {
+    if (floor === true) {
+      const horizontal = (Math.floor((50 / radius) * 10000) / 10000);
+
+      return {
+        horizontal: horizontal,
+        vertical: (Math.floor(((horizontal * horizontal) / 360) * 10000) / 10000)
+      };
+    } else {
+      const horizontal = (Math.ceil((50 / radius) * 10000) / 10000);
+
+      return {
+        horizontal: horizontal,
+        vertical: (Math.ceil(((horizontal * horizontal) / 360) * 10000)/10000)
+      };
+    }
   }
 
   private _generateSetBlocks(
     firstBlock : ICoodinates,
     commands : Array<string>,
     totalRepeats : number,
-    oneoffs : IOneOffCmds = { first: [], last: [] }
+    oneoffs : IOneOffCmds = { first: [], last: [], end: '' }
   ) : string {
     let output = '';
+    const l = commands.length;
+    const prefix = '';
+    // const prefix = '/';
+    const cmntPrefix = '// ---------------------------------------' +
+                       '--------\n// ';
 
-    // for (let a = 0, c = commands.length; a < c; a += 1) {
-    // }
-    for (let a = 0, c = commands.length; a < c; a += 1) {
-      output += commands[a] + '\n';
+    let chain = '';
+    for (let a = 0, c = oneoffs.first.length; a < c; a += 1) {
+      const tmp = this._showCmnt(
+        oneoffs.first[a],
+        prefix + 'setblock' +
+        coordStr({
+          ...firstBlock,
+          y: (firstBlock.y + 1 + (a + 1))
+        }) +
+        ' minecraft:' + chain + 'command_block' +
+        '{[[CMD]]}' + '[facing=north]\n',
+        chain
+      );
+      chain = tmp.chain;
+      output += tmp.cmd;
     }
+
+    if (output !== '') {
+      output = cmntPrefix + 'Do some initial setup\n\n' + output +
+               '\n\n';
+    }
+
+    output += cmntPrefix + 'Generate the the command blocks that ' +
+              'will do the building\n\n'
+
+    for (let a = 0, c = l; a < c; a += 1) {
+      const tmp = this._showCmnt(
+        commands[a],
+        prefix + 'setblock' +
+        coordStr({
+          ...firstBlock,
+          x: (firstBlock.x + (a + 1))
+        }) +
+        ' minecraft:chain_command_block' +
+        '{[[CMD]]}' + '[facing=east]\n'
+      );
+      output += tmp.cmd;
+    }
+
+    output += '\n' + cmntPrefix + 'Clone the blocks we just created\n';
+
+    for (let a = 0, c = totalRepeats; a < c; a += 1) {
+      output += '\n'
+      output += prefix + 'clone' + coordStr({
+        ...firstBlock,
+        x: (firstBlock.x + 1)
+      }) + coordStr({
+        ...firstBlock,
+        x: (firstBlock.x + l)
+      }) + coordStr({
+        ...firstBlock,
+        x: (firstBlock.x + 1 + ((a + 1) * l))
+      })
+    }
+    output += '\n\n\n' + cmntPrefix + 'Start everthing going\n\n' +
+              prefix + 'setblock' +
+              coordStr({
+                ...firstBlock,
+                y: (firstBlock.y + 1)
+              }) +
+              ' minecraft:redstone_block\n';
+
     return output;
   }
 
+  /**
+   * Generate the commands used for generating a sphere
+   *
+   * @param {ICoodinates} centre      Coordinates for the centre of
+   *                                  the sphere
+   * @param {number}      radius      Radius of the sphere
+   * @param {number}      thickness   Thickness of the wall of the
+   *                                  sphere
+   * @param {string}      blockTypeID ID of block type to build the
+   *                                  sphere
+   *
+   * @returns {string} List of commands to run in Minecraft
+   */
   private _generateSphere(
     centre : ICoodinates,
     radius : number,
     thickness : number,
     blockTypeID : string
   ) : string {
-    const rotation = this._getRotation(radius, thickness);
-    let output = '';
-    const cmds : Array<string> = [
-      '/execute at @p run setblock ^ ^ ^' + radius + ' minecraft:' +
-      blockTypeID,
-      '/execute at @p run tp @p ' + this._coordStr(centre) + ' ~' +
-      rotation.horizontal + ' ~' + rotation.vertical + '\n'
-    ];
+    const rotation = this._getRotation(radius);
+    const cmds : Array<string> = [];
     const firstBlock : ICoodinates = {
-      x: centre.x + radius / 2,
-      y: centre.y + radius / 2,
+      x: Math.ceil(centre.x + radius * 0.75),
+      y: Math.ceil(centre.y + radius * 0.75),
       z: this.vMax - 3
     }
+    const oneoffs : IOneOffCmds = {
+      first: [
+        // TP to the centre of the sphere, facing up
+        '/execute at @p run tp @p' + coordStr(centre) +
+        ' facing' + coordStr({...centre, z: 320}),
+        '/setblock' + coordStr(firstBlock) + ' ' +
+        'minecraft:redstone_block'
+      ],
+      last: [],
+      end: 'unless ' + {...centre, z: centre.z as number - radius}
+    };
 
+    for (let a = 0, c = thickness; c >= 0; c -= 1, a += 1) {
+      if (a > 0 && thickness > 1) {
+        cmds.push(
+          '// TP back to the previous location to make sure you ' +
+          'haven\'t fallen below the appropriate point',
+          '/execute at @p run tp @p' + coordStr(centre) + ' ~ ~',
+          '// Set another layer in the thickness of the sphere'
+        );
+      }
+      // Set a block for every level of thickness in the sphere
+      cmds.push(
+        '// rotate position to be able to set another block on ' +
+        'the outside of the sphere',
+        '/execute at @p run setblock ^ ^ ^' + (radius - a) + ' minecraft:' +
+        blockTypeID
+      );
+    }
+    cmds.push(
+      '/execute at @p run tp @p' + coordStr(centre) + ' ~ ~' +
+      rotation.horizontal + ' ~' + rotation.vertical
+    );
 
-    return this._generateSetBlocks(firstBlock, cmds, 36);
+    return this._generateSetBlocks(firstBlock, cmds, radius * 1.5, oneoffs);
   }
 
   private _generateCylinder(
@@ -1161,7 +1319,88 @@ export class MinecraftSphere extends LitElement {
     thickness : number,
     blockTypeID : string
   ) : string {
-    let output = '';
+    const rotation = this._getRotation(radius);
+    const cmds : Array<string> = [];
+    const oneoffs : IOneOffCmds = {
+      first: [
+        // TP to the centre of the cylinder, facing east
+        '/execute at @p run tp @p' + coordStr(centre) +
+        ' facing' + coordStr({...centre, x: centre.x + radius})
+      ],
+      last: []
+    };
+
+    for (let a = 0, c = thickness; a >= 0; a -= 1) {
+      // Set a block for every level of thickness in the sphere
+      cmds.push(
+        '/execute at @p run setblock ^ ^ ^' + c + ' minecraft:' +
+        blockTypeID,
+        // TP back to the previous location to make sure you haven't
+        // fallen below the appropriate point
+        '/execute at @p run tp @p' + coordStr(centre) + ' ~ ~'
+      );
+    }
+    cmds.push(
+      '/execute at @p run tp @p' + coordStr({...centre, z: '~1'}) + ' ~ ~' +
+      rotation.horizontal + ' ~'
+    );
+
+    const firstBlock : ICoodinates = {
+      x: centre.x + radius / 2,
+      y: centre.y + radius / 2,
+      z: this.vMax - 3
+    }
+
+    return this._generateSetBlocks(firstBlock, cmds, 36, oneoffs);
+  }
+
+  /**
+   * Filter the list of available Minecraft block types using the
+   * supplied string
+   *
+   * @param {string} value User or attribute supplied value for
+   *                       Minecraft block type
+   *
+   * @returns {string} The label for the matched block type or the
+   *                   original input if no block could be matched
+   */
+  private _filterBlockListInner(value : string) : string {
+    // we want to normalise the input value to do more
+    // reliable matching
+    const _value = normalise(value);
+    const filtered = mineCraftBlocks.filter(
+      item => (item.norm.indexOf(_value) > -1)
+    );
+
+    let output = value;
+    let l = filtered.length;
+
+    this._filteredBlocks = filtered;
+
+    if (l === 1) {
+      // This is the only option so let's set it as the chosen option
+      // and clear the filtered list
+      // (If this isn't right the user can start again)
+      this.blockTypeLabel = filtered[0].label;
+      this.blockTypeID = filtered[0].id;
+      this._filteredBlocks = [];
+
+      output = filtered[0].label;
+    } else if (l < 40) {
+      // We don't have a direct match but we have a limited number
+      // of possibilities.
+      // Lets see if we can narrow that down to an exact match
+      const tmp = filtered.filter(item => item.norm === _value);
+
+      if (tmp.length === 1) {
+        // We have an exact match. Let's set that as the selected
+        // block type
+        // (The user will still be able to look through the list
+        // of available options)
+        this.blockTypeLabel = tmp[0].label;
+        this.blockTypeID = tmp[0].id;
+      }
+    }
 
     return output;
   }
@@ -1186,34 +1425,6 @@ export class MinecraftSphere extends LitElement {
 
     input.value = this._filterBlockListInner(value);
   }
-
-  private _filterBlockListInner(value : string) : string {
-    const _value = normalise(value);
-    const filtered = mineCraftBlocks.filter(item => (item.norm.indexOf(_value) > -1));
-
-    let output = value;
-    let l = filtered.length;
-
-
-    if (l === 1) {
-      this.blockTypeLabel = filtered[0].label;
-      this.blockTypeID = filtered[0].id;
-      this._filteredBlocks = [];
-
-      output = filtered[0].label;
-    } else if (l < 40) {
-      const tmp = filtered.filter(item => item.norm === _value);
-
-      if (tmp.length === 1) {
-        this.blockTypeLabel = tmp[0].label;
-        this.blockTypeID = tmp[0].id;
-      }
-    }
-
-    this._filteredBlocks = filtered;
-    return output;
-  }
-
 
   /**
    * Handle general user initiated changes & clicks
@@ -1255,6 +1466,10 @@ export class MinecraftSphere extends LitElement {
 
       case 'ignore-warnings':
         this.ignoreWarnings = input.checked;
+        break;
+
+      case 'show-comments':
+        this.showExtraComments = input.checked;
         break;
 
       case 'object-type-sphere':
@@ -1308,7 +1523,12 @@ export class MinecraftSphere extends LitElement {
     }
   }
 
-
+  /**
+   * Render the HTML for all the user input fields needed to get the
+   * data to generate the code blocks
+   *
+   * @returns {TemplateResult}
+   */
   renderInputs() : TemplateResult {
     let btn = (this._canGenerate())
       ? html`
@@ -1317,17 +1537,6 @@ export class MinecraftSphere extends LitElement {
                  @click=${this.changeHandler}>
             Generate
           </button>`
-      : '';
-    let override = (this._warningCount > 0)
-      ? html`
-      <ul class="list-clean checkable-grp__items checkbox-grp__items">
-        <li>
-          <input type="checkbox" id="ignore-warnings" @change=${this.changeHandler} ?checked=${this.ignoreWarnings} class="cb-btn__input" />
-          <label for="ignore-warnings" class="cb-btn__label cb-btn__label--badge">Ignore warnings</label>
-        </li>
-      </ul>
-        `
-
       : '';
     const tmp = (this.radius - this._rMin - 1);
 
@@ -1414,6 +1623,21 @@ export class MinecraftSphere extends LitElement {
                step="1"
               @change=${this.changeHandler} />
       </p>
+      ${(this._doSphere === false)
+        ? html`
+          <p>
+            <label for="height">Cylinder height:</label>
+            <input type="number"
+                  id="height"
+                  name="height"
+                  .value="${this.height}"
+                  min="1"
+                  max="${(tmp > 1) ? tmp : 1}"
+                  step="1"
+                  @change=${this.changeHandler} />
+          </p>`
+        : ''
+      }
       <h2>${obj} center coordinates</h2>
       ${this.renderWarnings([this._warningMsgs.x])}
       <p>
@@ -1454,10 +1678,29 @@ export class MinecraftSphere extends LitElement {
                size="6"
               @change=${this.changeHandler} />
       </p>
-      ${override}
+      <ul class="list-clean checkable-grp__items checkbox-grp__items">
+        ${(this._warningCount > 0)
+          ? html`
+            <li>
+              <input type="checkbox" id="ignore-warnings" @change=${this.changeHandler} ?checked=${this.ignoreWarnings} class="cb-btn__input" />
+              <label for="ignore-warnings" class="cb-btn__label cb-btn__label--badge">Ignore warnings</label>
+            </li>`
+          : ''
+        }
+        <li>
+          <input type="checkbox" id="show-comments" @change=${this.changeHandler} ?checked=${this.showExtraComments} class="cb-btn__input" />
+          <label for="show-comments" class="cb-btn__label cb-btn__label--badge">Show extra comments</label>
+        </li>
+      </ul>
       ${btn}`
   }
 
+  /**
+   * Render the HTML to show the output this component generated
+   *
+   * @returns {TemplateResult} A textarea containing the commands
+   *                           (and instructions) the user needs
+   */
   renderCode() : TemplateResult {
     const _centre = {
       x : this.centreX,
@@ -1486,7 +1729,11 @@ export class MinecraftSphere extends LitElement {
       </button>`
   }
 
-
+  /**
+   * The main render function for this component
+   *
+   * @returns {TemplateResult}
+   */
   render() : TemplateResult {
     this._init();
 

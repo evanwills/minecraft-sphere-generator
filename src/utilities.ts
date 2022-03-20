@@ -1,4 +1,4 @@
-
+import { ICoodinates } from "./minecraft-sphere.d";
 /**
  * Make the first leter in a string upper case
  *
@@ -29,4 +29,22 @@ export const makePos = (input : number) : number => {
 
 export const normalise = (input : string) : string => {
   return input.replace(/[^a-z0-9 ]+/ig, ' ').toLowerCase().trim();
+}
+
+
+
+/**
+ * Get the coordinates of a specific position as a string that can
+ * be used in a Minecraft command
+ *
+ * @param {ICoodinates} coordinates X, Y, Z coordinates for a
+ *                                  specific position
+ *
+ * @returns {string} String in the format " X Z Y"
+ *                  (Note: string includes a leading space)
+ */
+export const coordStr = (coordinates : ICoodinates) : string => {
+  return ' ' + coordinates.x.toString() +
+         ' ' + coordinates.z.toString() +
+         ' ' + coordinates.y.toString();
 }
