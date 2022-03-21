@@ -1,7 +1,7 @@
 import { html, css, LitElement, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-import { IBlockType, ICoodinates, IOneOffCmds, IRotation, IWarnings } from './minecraft-sphere.d';
+import { IBlockType, ICmdReturn, ICoodinates, IOneOffCmds, IRotation, IWarnings } from './minecraft-sphere.d';
 import { ucFirst, makePos, normalise, coordStr } from './utilities';
 
 
@@ -1125,22 +1125,40 @@ export class MinecraftSphere extends LitElement {
            (this._warningCount === 0 || this.ignoreWarnings === true))
   }
 
-  private _showCmnt(
+  /**
+   * Get a formatted minecraft command or, (if extra comments are
+   * turned on) a helper comment or empty string (if extra comments
+   * are turned off).
+   *
+   * @param input  Input comment or Minecraft Command
+   * @param output comment string or Minecraft setblock with command
+   *               embedded.
+   * @param chain  String to be modified if output is a command.
+   *
+   * @returns Object containing the (possibly) updated chain string
+   *          and string to append to output.
+   */
+  private _getCmdCmnt(
     input: string, output: string, chain: string = ''
-  ) : { cmd: string, chain: string } {
-    let tmp = '';
+  ) : ICmdReturn {
+    let _tmp = '';
     let _chain = chain;
+    let _c = 0;
+
     if (input.substring(0, 3) === '// ') {
       if (this.showExtraComments) {
-        tmp = '\n' + input + '\n'
+        _tmp = '\n' + input + '\n'
       }
     } else {
-      tmp = output.replace('[[CMD]]', input);
-      _chain = 'chain_'
+      _tmp = output.replace('[[CMD]]', input);
+      _chain = 'chain_';
+      _c = 1;
     }
+
     return {
-      cmd: tmp,
-      chain: _chain
+      output: _tmp,
+      chain: _chain,
+      count: _c
     }
   }
 
@@ -1178,16 +1196,16 @@ export class MinecraftSphere extends LitElement {
     totalRepeats : number,
     oneoffs : IOneOffCmds = { first: [], last: [], end: '' }
   ) : string {
-    let output = '';
-    const l = commands.length;
     const prefix = '';
     // const prefix = '/';
     const cmntPrefix = '// ---------------------------------------' +
                        '--------\n// ';
-
+    let output = '';
     let chain = '';
+    let cmdCount = 0;
+
     for (let a = 0, c = oneoffs.first.length; a < c; a += 1) {
-      const tmp = this._showCmnt(
+      const tmp = this._getCmdCmnt(
         oneoffs.first[a],
         prefix + 'setblock' +
         coordStr({
@@ -1198,8 +1216,9 @@ export class MinecraftSphere extends LitElement {
         '{[[CMD]]}' + '[facing=north]\n',
         chain
       );
+
       chain = tmp.chain;
-      output += tmp.cmd;
+      output += tmp.output;
     }
 
     if (output !== '') {
@@ -1210,8 +1229,8 @@ export class MinecraftSphere extends LitElement {
     output += cmntPrefix + 'Generate the the command blocks that ' +
               'will do the building\n\n'
 
-    for (let a = 0, c = l; a < c; a += 1) {
-      const tmp = this._showCmnt(
+    for (let a = 0; a < commands.length; a += 1) {
+      const tmp = this._getCmdCmnt(
         commands[a],
         prefix + 'setblock' +
         coordStr({
@@ -1221,24 +1240,35 @@ export class MinecraftSphere extends LitElement {
         ' minecraft:chain_command_block' +
         '{[[CMD]]}' + '[facing=east]\n'
       );
-      output += tmp.cmd;
+
+      output += tmp.output;
+      cmdCount += tmp.count
     }
 
     output += '\n' + cmntPrefix + 'Clone the blocks we just created\n';
 
-    for (let a = 0, c = totalRepeats; a < c; a += 1) {
-      output += '\n'
+    for (let a = 1; a < totalRepeats; a *= 2) {
+      output += (this.showExtraComments)
+        ? '\n\n// Iteration: ' + a + '\n'
+        : '\n'
       output += prefix + 'clone' + coordStr({
         ...firstBlock,
         x: (firstBlock.x + 1)
       }) + coordStr({
         ...firstBlock,
-        x: (firstBlock.x + l)
+        x: (firstBlock.x + cmdCount)
       }) + coordStr({
         ...firstBlock,
-        x: (firstBlock.x + 1 + ((a + 1) * l))
+        x: (firstBlock.x + 1 + cmdCount)
       })
+      cmdCount += cmdCount;
+      if (cmdCount > 1024) {
+        // We don't want too many blocks in a line.
+        // better stop cloning here.
+        break;
+      }
     }
+
     output += '\n\n\n' + cmntPrefix + 'Start everthing going\n\n' +
               prefix + 'setblock' +
               coordStr({
@@ -1310,7 +1340,7 @@ export class MinecraftSphere extends LitElement {
       rotation.horizontal + ' ~' + rotation.vertical
     );
 
-    return this._generateSetBlocks(firstBlock, cmds, radius * 1.5, oneoffs);
+    return this._generateSetBlocks(firstBlock, cmds, radius * radius, oneoffs);
   }
 
   private _generateCylinder(
@@ -1327,7 +1357,8 @@ export class MinecraftSphere extends LitElement {
         '/execute at @p run tp @p' + coordStr(centre) +
         ' facing' + coordStr({...centre, x: centre.x + radius})
       ],
-      last: []
+      last: [],
+      end: ''
     };
 
     for (let a = 0, c = thickness; a >= 0; a -= 1) {
