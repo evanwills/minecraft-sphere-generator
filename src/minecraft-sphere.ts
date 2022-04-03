@@ -1412,7 +1412,7 @@ export class MinecraftSphere extends LitElement {
       rotation.horizontal + ' ~' + rotation.vertical
     );
 
-    return 'tp' + coordStr({...centre, z: 320}) + '\n\n' +
+    return 'tp' + coordStr({x: (centre.x - 2), y: (centre.y - 2), z: 320}) + '\n\n' +
            this._generateSetBlocks(firstBlock, cmds, radius * radius, oneoffs);
   }
 
