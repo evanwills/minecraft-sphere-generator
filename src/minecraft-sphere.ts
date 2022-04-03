@@ -1258,7 +1258,7 @@ export class MinecraftSphere extends LitElement {
           y: (firstBlock.y + 1 + (a + 1))
         }) +
         ' minecraft:' + chain + 'command_block' +
-        '{[[CMD]]}' + '[facing=north]\n',
+        '{Command:"[[CMD]]"}' + '[facing=north]\n',
         chain
       );
 
@@ -1283,7 +1283,7 @@ export class MinecraftSphere extends LitElement {
           x: (firstBlock.x + (a + 1))
         }) +
         ' minecraft:chain_command_block' +
-        '{[[CMD]]}' + '[facing=east]\n'
+        '{Command:"[[CMD]]"}' + '[facing=east]\n'
       );
 
       output += tmp.output;
