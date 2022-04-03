@@ -2083,7 +2083,7 @@ let MinecraftSphere = class extends s$1 {
       _y = firstBlock.y + 1 + (a2 + 1);
       const tmp = this._getCmdCmnt(oneoffs.first[a2], prefix + "setblock" + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
         y: _y
-      })) + " minecraft:" + _chain + 'command_block[facing=south]{Command:"[[CMD]]",' + _auto + "}\n", _chain);
+      })) + " minecraft:" + _chain + 'command_block[facing=south]{Command:"[[CMD]]"' + _auto + "}\n", _chain);
       _chain = tmp.chain;
       output += tmp.output;
       _auto = ",auto:1";

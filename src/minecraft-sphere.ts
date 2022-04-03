@@ -1264,7 +1264,7 @@ export class MinecraftSphere extends LitElement {
           y: _y
         }) +
         ' minecraft:' + _chain + 'command_block' +
-        '[facing=south]' + '{Command:"[[CMD]]",' + _auto + '}\n',
+        '[facing=south]' + '{Command:"[[CMD]]"' + _auto + '}\n',
         _chain
       );
 
