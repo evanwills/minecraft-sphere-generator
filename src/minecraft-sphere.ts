@@ -1303,7 +1303,7 @@ export class MinecraftSphere extends LitElement {
         : '\n'
       output += prefix + 'clone' + coordStr({
         ...firstBlock,
-        x: (firstBlock.x + 1)
+        x: firstBlock.x
       }) + coordStr({
         ...firstBlock,
         x: (firstBlock.x + cmdCount)
