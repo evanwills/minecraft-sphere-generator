@@ -1315,7 +1315,7 @@ export class MinecraftSphere extends LitElement {
         x: (firstBlock.x + 1 + cmdCount)
       }) + coordStr({
         ...firstBlock,
-        x: (firstBlock.x + (a * cmdCount) + 2)
+        x: (firstBlock.x + cmdCount + 2)
       })
       cmdCount += cmdCount;
       if (cmdCount > 1024) {

@@ -2106,7 +2106,7 @@ let MinecraftSphere = class extends s$1 {
       })) + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
         x: firstBlock.x + 1 + cmdCount
       })) + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
-        x: firstBlock.x + a2 * cmdCount + 2
+        x: firstBlock.x + cmdCount + 2
       }));
       cmdCount += cmdCount;
       if (cmdCount > 1024) {
