@@ -951,7 +951,7 @@ export class MinecraftSphere extends LitElement {
     textarea {
       display: block;
       width: 100%;
-      height: 45rem;
+      height: 50rem;
       background-color: var(--bg-colour);
       color: var(--txt-colour);
       padding: 0.5rem;
@@ -1412,7 +1412,8 @@ export class MinecraftSphere extends LitElement {
       rotation.horizontal + ' ~' + rotation.vertical
     );
 
-    return this._generateSetBlocks(firstBlock, cmds, radius * radius, oneoffs);
+    return 'tp ' + coordStr({...centre, z: 320}) + '\n\n' +
+           this._generateSetBlocks(firstBlock, cmds, radius * radius, oneoffs);
   }
 
   private _generateCylinder(

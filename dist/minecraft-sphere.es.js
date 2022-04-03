@@ -2145,7 +2145,7 @@ let MinecraftSphere = class extends s$1 {
       cmds.push("// rotate position to be able to set another block on the outside of the sphere", "/execute at @p run setblock ^ ^ ^" + (radius - a2) + " minecraft:" + blockTypeID);
     }
     cmds.push("/execute at @p run tp @p" + coordStr(centre) + " ~" + rotation.horizontal + " ~" + rotation.vertical);
-    return this._generateSetBlocks(firstBlock, cmds, radius * radius, oneoffs);
+    return "tp " + coordStr(__spreadProps(__spreadValues({}, centre), { z: 320 })) + "\n\n" + this._generateSetBlocks(firstBlock, cmds, radius * radius, oneoffs);
   }
   _generateCylinder(centre, radius, thickness, blockTypeID) {
     const rotation = this._getRotation(radius);
@@ -2572,7 +2572,7 @@ MinecraftSphere.styles = r$2`
     textarea {
       display: block;
       width: 100%;
-      height: 45rem;
+      height: 50rem;
       background-color: var(--bg-colour);
       color: var(--txt-colour);
       padding: 0.5rem;
