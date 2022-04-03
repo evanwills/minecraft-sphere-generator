@@ -2091,7 +2091,7 @@ let MinecraftSphere = class extends s$1 {
     for (let a2 = 0; a2 < commands.length; a2 += 1) {
       const tmp = this._getCmdCmnt(commands[a2], prefix + "setblock" + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
         x: firstBlock.x + (a2 + 1)
-      })) + ' minecraft:chain_command_block[facing=north]{Command:"[[CMD]]"}\n');
+      })) + ' minecraft:chain_command_block[facing=east]{Command:"[[CMD]]"}\n');
       output += tmp.output;
       cmdCount += tmp.count;
       if (_firstCMD === "") {
