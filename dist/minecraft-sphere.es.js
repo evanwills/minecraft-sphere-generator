@@ -2113,7 +2113,7 @@ let MinecraftSphere = class extends s$1 {
         break;
       }
     }
-    output += "\n\n" + _firstCMD.replace("chain_command_block", "repeat_command_block");
+    output += "\n\n" + _firstCMD.replace("chain_command_block", "repeating_command_block");
     output += "\n\n\n" + cmntPrefix + "Start everthing going\n\n" + prefix + "setblock" + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
       y: firstBlock.y + 1
     })) + " minecraft:redstone_block\n";

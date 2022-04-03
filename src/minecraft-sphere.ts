@@ -1327,7 +1327,7 @@ export class MinecraftSphere extends LitElement {
 
     output += '\n\n' + _firstCMD.replace(
       'chain_command_block',
-      'repeat_command_block'
+      'repeating_command_block'
     );
 
     output += '\n\n\n' + cmntPrefix + 'Start everthing going\n\n' +
