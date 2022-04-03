@@ -2074,7 +2074,7 @@ let MinecraftSphere = class extends s$1 {
     const prefix = "";
     const cmntPrefix = "// ---------------------------------------------------------\n// ";
     let output = "";
-    let chain = "chain_";
+    let chain = "";
     let cmdCount = 0;
     for (let a2 = 0, c2 = oneoffs.first.length; a2 < c2; a2 += 1) {
       const tmp = this._getCmdCmnt(oneoffs.first[a2], prefix + "setblock" + coordStr(__spreadProps(__spreadValues({}, firstBlock), {

@@ -1246,7 +1246,7 @@ export class MinecraftSphere extends LitElement {
     const cmntPrefix : string = '// ------------------------------' +
                                    '---------------------------\n// ';
     let output = '';
-    let chain = 'chain_';
+    let chain = '';
     let cmdCount = 0;
 
     // set one-off commands
