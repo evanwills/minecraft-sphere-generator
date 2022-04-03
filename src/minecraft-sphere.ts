@@ -1197,7 +1197,9 @@ export class MinecraftSphere extends LitElement {
     } else {
       _tmp = output.replace('[[CMD]]', input);
       _chain = 'chain_';
-      _c = 1;
+      if (output !== '') {
+        _c = 1;
+      }
     }
 
     return {
@@ -1278,10 +1280,20 @@ export class MinecraftSphere extends LitElement {
                '\n\n';
     }
 
+    output = cmntPrefix +
+             'Teleport to just near where all the command blocks will\n' +
+             '// be set, so you can see what\'s going on with the command\n' +
+             '// blocks\n\n' +
+             'tp' + coordStr({x: (firstBlock.x - 2), y: (firstBlock.y - 2), z: firstBlock.z}) +
+             ' facing' + coordStr(firstBlock) + '\n\n\n' + output
+
     output += cmntPrefix + 'Generate the the command blocks that ' +
               'will do the building\n\n'
 
     let _firstCMD = ''
+
+    _x = firstBlock.x + 1;
+    const _first = _x;
 
     for (let a = 0; a < commands.length; a += 1) {
       const tmp = this._getCmdCmnt(
@@ -1289,42 +1301,49 @@ export class MinecraftSphere extends LitElement {
         prefix + 'setblock' +
         coordStr({
           ...firstBlock,
-          x: (firstBlock.x + (a + 1))
+          x: _x
         }) +
         ' minecraft:chain_command_block' +
         '[facing=east]' + '{Command:"[[CMD]]",auto:1}\n'
       );
 
       output += tmp.output;
-      cmdCount += tmp.count
       if (_firstCMD === '') {
         _firstCMD = tmp.output;
       }
+
+      _x += tmp.count;
     }
+
+    let _len = (_first > _x)
+      ? _first - _x
+      : _x - _first;
 
     output += '\n' + cmntPrefix + 'Clone the blocks we just created\n';
     // const _one = (firstBlock.x >= 0)
     //   ? 1
     //   : -1;
-
+    _x = 0;
     // generate clone commands
     for (let a = 1; a < totalRepeats; a *= 2) {
       output += (this.showExtraComments)
-        ? '\n\n// Iteration: ' + a + '\n'
+        ? '\n\n// Iteration: ' + a + ' (' + _len + ' blocks)\n'
         : '\n'
       output += prefix + 'clone' + coordStr({
         ...firstBlock,
-        x: firstBlock.x + 2
+        x: _first
       }) + coordStr({
         ...firstBlock,
-        x: (firstBlock.x + 1 + cmdCount)
+        x: (firstBlock.x + _len)
       }) + coordStr({
         ...firstBlock,
-        x: (firstBlock.x + cmdCount + 2)
+        x: (firstBlock.x + _len + 1)
       })
-      cmdCount += cmdCount;
-      _x = (firstBlock.x + cmdCount + 2)
-      if (cmdCount > 1024) {
+
+      _len += _len
+      _x = (firstBlock.x + _len)
+
+      if (_len > 1500) {
         // We don't want too many blocks in a line.
         // better stop cloning here.
         break;
@@ -1345,7 +1364,7 @@ export class MinecraftSphere extends LitElement {
               ' minecraft:redstone_block\n';
 
     output += '\n\n\n' + cmntPrefix.replace(/-/g, '=') + '' +
-              'Manually stop (remove redstone power for commands)' +
+              'Manually stop (remove all command and redstone blocks)' +
               '\n\n' + prefix + 'fill' +
               coordStr({
                 ...firstBlock,
@@ -1356,6 +1375,8 @@ export class MinecraftSphere extends LitElement {
                 y: _y
               }) +
               ' minecraft:air\n';
+
+    // output =
 
     return output;
   }
@@ -1388,9 +1409,12 @@ export class MinecraftSphere extends LitElement {
     }
     const oneoffs : IOneOffCmds = {
       first: [
-        // TP to the centre of the sphere, facing up
+        '// TP to the centre of the sphere, facing up, so you\'re in\n' +
+        '// the right spot and facing the right direction to start\n' +
+        '// generating the sphere.',
         '/execute at @p run tp @p' + coordStr(centre) +
         ' facing' + coordStr({...centre, z: 320}),
+        '// Set the redstone block that starts the sphere generation',
         '/setblock' + coordStr({...firstBlock, x: firstBlock.x + 1}) + ' ' +
         'minecraft:redstone_block'
       ],
@@ -1399,31 +1423,33 @@ export class MinecraftSphere extends LitElement {
     };
 
     for (let a = 0, c = thickness; c > 0; c -= 1, a += 1) {
+      let msg = '// Set the outer a block for the outer layer of the sphere';
       if (a > 0 && thickness > 1) {
         cmds.push(
           '// TP back to the previous location to make sure you ' +
           'haven\'t fallen below the appropriate point',
           '/execute at @p run tp @p' + coordStr(centre) + ' ~ ~',
-          '// Set another layer in the thickness of the sphere'
         );
+
+        msg = '// Set another layer in the thickness of the sphere';
       }
 
       // Set a block for every level of thickness in the sphere
       cmds.push(
-        '// rotate position to be able to set another block on ' +
-        'the outside of the sphere',
+        msg,
         '/execute at @p run setblock ^ ^ ^' + (radius - a) + ' minecraft:' +
         blockTypeID
       );
     }
 
     cmds.push(
+      '// rotate position to be able to set another block on ' +
+      'the outside of the sphere',
       '/execute at @p run tp @p' + coordStr(centre) + ' ~' +
       rotation.horizontal + ' ~' + rotation.vertical
     );
 
-    return 'tp' + coordStr({x: (centre.x - 2), y: (centre.y - 2), z: 320}) + '\n\n' +
-           this._generateSetBlocks(firstBlock, cmds, radius * radius, oneoffs);
+    return this._generateSetBlocks(firstBlock, cmds, radius * radius, oneoffs);
   }
 
   private _generateCylinder(
