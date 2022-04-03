@@ -2074,17 +2074,19 @@ let MinecraftSphere = class extends s$1 {
     const prefix = "";
     const cmntPrefix = "// ---------------------------------------------------------\n// ";
     let output = "";
-    let chain = "";
     let cmdCount = 0;
+    let _chain = "";
     let _x = 0;
     let _y = 0;
+    let _auto = "";
     for (let a2 = 0, c2 = oneoffs.first.length; a2 < c2; a2 += 1) {
       _y = firstBlock.y + 1 + (a2 + 1);
       const tmp = this._getCmdCmnt(oneoffs.first[a2], prefix + "setblock" + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
         y: _y
-      })) + " minecraft:" + chain + 'command_block[facing=south]{Command:"[[CMD]]",auto:1}\n', chain);
-      chain = tmp.chain;
+      })) + " minecraft:" + _chain + 'command_block[facing=south]{Command:"[[CMD]]",' + _auto + "}\n", _chain);
+      _chain = tmp.chain;
       output += tmp.output;
+      _auto = ",auto:1";
     }
     if (output !== "") {
       output = cmntPrefix + "Do some initial setup\n\n" + output + "\n\n";

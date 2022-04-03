@@ -1246,10 +1246,11 @@ export class MinecraftSphere extends LitElement {
     const cmntPrefix : string = '// ------------------------------' +
                                    '---------------------------\n// ';
     let output = '';
-    let chain = '';
     let cmdCount = 0;
+    let _chain = '';
     let _x = 0;
     let _y = 0;
+    let _auto = '';
 
     // set one-off commands
     // (used for moving to the correct spot to start building the sphere)
@@ -1262,13 +1263,14 @@ export class MinecraftSphere extends LitElement {
           ...firstBlock,
           y: _y
         }) +
-        ' minecraft:' + chain + 'command_block' +
-        '[facing=south]' + '{Command:"[[CMD]]",auto:1}\n',
-        chain
+        ' minecraft:' + _chain + 'command_block' +
+        '[facing=south]' + '{Command:"[[CMD]]",' + _auto + '}\n',
+        _chain
       );
 
-      chain = tmp.chain;
+      _chain = tmp.chain;
       output += tmp.output;
+      _auto = ',auto:1';
     }
 
     if (output !== '') {
