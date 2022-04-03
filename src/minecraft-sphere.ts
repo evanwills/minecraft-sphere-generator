@@ -1248,16 +1248,19 @@ export class MinecraftSphere extends LitElement {
     let output = '';
     let chain = '';
     let cmdCount = 0;
+    let _x = 0;
+    let _y = 0;
 
     // set one-off commands
     // (used for moving to the correct spot to start building the sphere)
     for (let a = 0, c = oneoffs.first.length; a < c; a += 1) {
+      _y = (firstBlock.y + 1 + (a + 1))
       const tmp = this._getCmdCmnt(
         oneoffs.first[a],
         prefix + 'setblock' +
         coordStr({
           ...firstBlock,
-          y: (firstBlock.y + 1 + (a + 1))
+          y: _y
         }) +
         ' minecraft:' + chain + 'command_block' +
         '[facing=south]' + '{Command:"[[CMD]]",auto:1}\n',
@@ -1318,6 +1321,7 @@ export class MinecraftSphere extends LitElement {
         x: (firstBlock.x + cmdCount + 2)
       })
       cmdCount += cmdCount;
+      _x = (firstBlock.x + cmdCount + 2)
       if (cmdCount > 1024) {
         // We don't want too many blocks in a line.
         // better stop cloning here.
@@ -1340,10 +1344,14 @@ export class MinecraftSphere extends LitElement {
 
     output += '\n\n\n' + cmntPrefix.replace(/-/g, '=') + '' +
               'Manually stop (remove redstone power for commands)' +
-              '\n\n' + prefix + 'setblock' +
+              '\n\n' + prefix + 'fill' +
               coordStr({
                 ...firstBlock,
-                y: (firstBlock.y + 1)
+                x: _x
+              }) +
+              coordStr({
+                ...firstBlock,
+                y: _y
               }) +
               ' minecraft:air\n';
 

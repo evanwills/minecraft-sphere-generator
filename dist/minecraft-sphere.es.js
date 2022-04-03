@@ -2076,9 +2076,12 @@ let MinecraftSphere = class extends s$1 {
     let output = "";
     let chain = "";
     let cmdCount = 0;
+    let _x = 0;
+    let _y = 0;
     for (let a2 = 0, c2 = oneoffs.first.length; a2 < c2; a2 += 1) {
+      _y = firstBlock.y + 1 + (a2 + 1);
       const tmp = this._getCmdCmnt(oneoffs.first[a2], prefix + "setblock" + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
-        y: firstBlock.y + 1 + (a2 + 1)
+        y: _y
       })) + " minecraft:" + chain + 'command_block[facing=south]{Command:"[[CMD]]",auto:1}\n', chain);
       chain = tmp.chain;
       output += tmp.output;
@@ -2109,6 +2112,7 @@ let MinecraftSphere = class extends s$1 {
         x: firstBlock.x + cmdCount + 2
       }));
       cmdCount += cmdCount;
+      _x = firstBlock.x + cmdCount + 2;
       if (cmdCount > 1024) {
         break;
       }
@@ -2117,8 +2121,10 @@ let MinecraftSphere = class extends s$1 {
     output += "\n\n\n" + cmntPrefix + "Start everthing going\n\n" + prefix + "setblock" + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
       y: firstBlock.y + 1
     })) + " minecraft:redstone_block\n";
-    output += "\n\n\n" + cmntPrefix.replace(/-/g, "=") + "Manually stop (remove redstone power for commands)\n\n" + prefix + "setblock" + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
-      y: firstBlock.y + 1
+    output += "\n\n\n" + cmntPrefix.replace(/-/g, "=") + "Manually stop (remove redstone power for commands)\n\n" + prefix + "fill" + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
+      x: _x
+    })) + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
+      y: _y
     })) + " minecraft:air\n";
     return output;
   }
