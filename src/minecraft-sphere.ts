@@ -1249,6 +1249,8 @@ export class MinecraftSphere extends LitElement {
     let chain = '';
     let cmdCount = 0;
 
+    // set one-off commands
+    // (used for moving to the correct spot to start building the sphere)
     for (let a = 0, c = oneoffs.first.length; a < c; a += 1) {
       const tmp = this._getCmdCmnt(
         oneoffs.first[a],
@@ -1306,13 +1308,13 @@ export class MinecraftSphere extends LitElement {
         : '\n'
       output += prefix + 'clone' + coordStr({
         ...firstBlock,
-        x: firstBlock.x +_one
+        x: firstBlock.x + 2
       }) + coordStr({
         ...firstBlock,
-        x: (firstBlock.x + (cmdCount * _one))
+        x: (firstBlock.x + 1 + cmdCount)
       }) + coordStr({
         ...firstBlock,
-        x: (firstBlock.x + _one + (cmdCount * _one))
+        x: (firstBlock.x + (a * cmdCount) + 2)
       })
       cmdCount += cmdCount;
       if (cmdCount > 1024) {
