@@ -1408,7 +1408,7 @@ export class MinecraftSphere extends LitElement {
     }
 
     cmds.push(
-      '/execute at @p run tp @p' + coordStr(centre) + ' ~ ~' +
+      '/execute at @p run tp @p' + coordStr(centre) + ' ~' +
       rotation.horizontal + ' ~' + rotation.vertical
     );
 

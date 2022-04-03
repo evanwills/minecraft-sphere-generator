@@ -2144,7 +2144,7 @@ let MinecraftSphere = class extends s$1 {
       }
       cmds.push("// rotate position to be able to set another block on the outside of the sphere", "/execute at @p run setblock ^ ^ ^" + (radius - a2) + " minecraft:" + blockTypeID);
     }
-    cmds.push("/execute at @p run tp @p" + coordStr(centre) + " ~ ~" + rotation.horizontal + " ~" + rotation.vertical);
+    cmds.push("/execute at @p run tp @p" + coordStr(centre) + " ~" + rotation.horizontal + " ~" + rotation.vertical);
     return this._generateSetBlocks(firstBlock, cmds, radius * radius, oneoffs);
   }
   _generateCylinder(centre, radius, thickness, blockTypeID) {
