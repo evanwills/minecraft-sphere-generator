@@ -1296,6 +1296,9 @@ export class MinecraftSphere extends LitElement {
     }
 
     output += '\n' + cmntPrefix + 'Clone the blocks we just created\n';
+    const _one = (firstBlock.x >= 0)
+      ? 1
+      : -1;
 
     for (let a = 1; a < totalRepeats; a *= 2) {
       output += (this.showExtraComments)
@@ -1303,13 +1306,13 @@ export class MinecraftSphere extends LitElement {
         : '\n'
       output += prefix + 'clone' + coordStr({
         ...firstBlock,
-        x: firstBlock.x
+        x: firstBlock.x +_one
       }) + coordStr({
         ...firstBlock,
-        x: (firstBlock.x + cmdCount)
+        x: (firstBlock.x + (cmdCount * _one))
       }) + coordStr({
         ...firstBlock,
-        x: (firstBlock.x + 1 + cmdCount)
+        x: (firstBlock.x + _one + (cmdCount * _one))
       })
       cmdCount += cmdCount;
       if (cmdCount > 1024) {
