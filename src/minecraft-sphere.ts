@@ -951,7 +951,7 @@ export class MinecraftSphere extends LitElement {
     textarea {
       display: block;
       width: 100%;
-      height: 22rem;
+      height: 45rem;
       background-color: var(--bg-colour);
       color: var(--txt-colour);
       padding: 0.5rem;
@@ -1302,6 +1302,7 @@ export class MinecraftSphere extends LitElement {
       ? 1
       : -1;
 
+    // generate clone commands
     for (let a = 1; a < totalRepeats; a *= 2) {
       output += (this.showExtraComments)
         ? '\n\n// Iteration: ' + a + '\n'
