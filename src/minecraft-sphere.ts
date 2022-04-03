@@ -1258,7 +1258,7 @@ export class MinecraftSphere extends LitElement {
           y: (firstBlock.y + 1 + (a + 1))
         }) +
         ' minecraft:' + chain + 'command_block' +
-        '{Command:"[[CMD]]"}' + '[facing=north]\n',
+        '[facing=north]' + '{Command:"[[CMD]]"}\n',
         chain
       );
 
@@ -1274,6 +1274,8 @@ export class MinecraftSphere extends LitElement {
     output += cmntPrefix + 'Generate the the command blocks that ' +
               'will do the building\n\n'
 
+    let _firstCMD = ''
+
     for (let a = 0; a < commands.length; a += 1) {
       const tmp = this._getCmdCmnt(
         commands[a],
@@ -1283,11 +1285,14 @@ export class MinecraftSphere extends LitElement {
           x: (firstBlock.x + (a + 1))
         }) +
         ' minecraft:chain_command_block' +
-        '{Command:"[[CMD]]"}' + '[facing=east]\n'
+        '[facing=north]' + '{Command:"[[CMD]]"}\n'
       );
 
       output += tmp.output;
       cmdCount += tmp.count
+      if (_firstCMD === '') {
+        _firstCMD = tmp.output;
+      }
     }
 
     output += '\n' + cmntPrefix + 'Clone the blocks we just created\n';
@@ -1313,6 +1318,11 @@ export class MinecraftSphere extends LitElement {
         break;
       }
     }
+
+    output += '\n\n' + _firstCMD.replace(
+      'chain_command_block',
+      'repeat_command_block'
+    );
 
     output += '\n\n\n' + cmntPrefix + 'Start everthing going\n\n' +
               prefix + 'setblock' +
