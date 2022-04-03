@@ -2079,7 +2079,7 @@ let MinecraftSphere = class extends s$1 {
     for (let a2 = 0, c2 = oneoffs.first.length; a2 < c2; a2 += 1) {
       const tmp = this._getCmdCmnt(oneoffs.first[a2], prefix + "setblock" + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
         y: firstBlock.y + 1 + (a2 + 1)
-      })) + " minecraft:" + chain + 'command_block[facing=south]{Command:"[[CMD]]"}\n', chain);
+      })) + " minecraft:" + chain + 'command_block[facing=south]{Command:"[[CMD]]",auto:1}\n', chain);
       chain = tmp.chain;
       output += tmp.output;
     }
@@ -2091,7 +2091,7 @@ let MinecraftSphere = class extends s$1 {
     for (let a2 = 0; a2 < commands.length; a2 += 1) {
       const tmp = this._getCmdCmnt(commands[a2], prefix + "setblock" + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
         x: firstBlock.x + (a2 + 1)
-      })) + ' minecraft:chain_command_block[facing=east]{Command:"[[CMD]]"}\n');
+      })) + ' minecraft:chain_command_block[facing=east]{Command:"[[CMD]]",auto:1}\n');
       output += tmp.output;
       cmdCount += tmp.count;
       if (_firstCMD === "") {
@@ -2113,7 +2113,7 @@ let MinecraftSphere = class extends s$1 {
         break;
       }
     }
-    output += "\n\n" + _firstCMD.replace("chain_command_block", "repeating_command_block");
+    output += "\n\n" + _firstCMD.replace("chain_command_block", "repeating_command_block").replace(",auto:1", "");
     output += "\n\n\n" + cmntPrefix + "Start everthing going\n\n" + prefix + "setblock" + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
       y: firstBlock.y + 1
     })) + " minecraft:redstone_block\n";

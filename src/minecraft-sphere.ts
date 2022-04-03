@@ -1260,7 +1260,7 @@ export class MinecraftSphere extends LitElement {
           y: (firstBlock.y + 1 + (a + 1))
         }) +
         ' minecraft:' + chain + 'command_block' +
-        '[facing=south]' + '{Command:"[[CMD]]"}\n',
+        '[facing=south]' + '{Command:"[[CMD]]",auto:1}\n',
         chain
       );
 
@@ -1287,7 +1287,7 @@ export class MinecraftSphere extends LitElement {
           x: (firstBlock.x + (a + 1))
         }) +
         ' minecraft:chain_command_block' +
-        '[facing=east]' + '{Command:"[[CMD]]"}\n'
+        '[facing=east]' + '{Command:"[[CMD]]",auto:1}\n'
       );
 
       output += tmp.output;
@@ -1328,7 +1328,7 @@ export class MinecraftSphere extends LitElement {
     output += '\n\n' + _firstCMD.replace(
       'chain_command_block',
       'repeating_command_block'
-    );
+    ).replace(',auto:1', '');
 
     output += '\n\n\n' + cmntPrefix + 'Start everthing going\n\n' +
               prefix + 'setblock' +
