@@ -1298,9 +1298,9 @@ export class MinecraftSphere extends LitElement {
     }
 
     output += '\n' + cmntPrefix + 'Clone the blocks we just created\n';
-    const _one = (firstBlock.x >= 0)
-      ? 1
-      : -1;
+    // const _one = (firstBlock.x >= 0)
+    //   ? 1
+    //   : -1;
 
     // generate clone commands
     for (let a = 1; a < totalRepeats; a *= 2) {

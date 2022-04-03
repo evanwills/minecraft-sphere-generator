@@ -2102,11 +2102,11 @@ let MinecraftSphere = class extends s$1 {
     for (let a2 = 1; a2 < totalRepeats; a2 *= 2) {
       output += this.showExtraComments ? "\n\n// Iteration: " + a2 + "\n" : "\n";
       output += prefix + "clone" + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
-        x: firstBlock.x + 1
-      })) + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
-        x: firstBlock.x + cmdCount
+        x: firstBlock.x + 2
       })) + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
         x: firstBlock.x + 1 + cmdCount
+      })) + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
+        x: firstBlock.x + a2 * cmdCount + 2
       }));
       cmdCount += cmdCount;
       if (cmdCount > 1024) {
@@ -2572,7 +2572,7 @@ MinecraftSphere.styles = r$2`
     textarea {
       display: block;
       width: 100%;
-      height: 22rem;
+      height: 45rem;
       background-color: var(--bg-colour);
       color: var(--txt-colour);
       padding: 0.5rem;
