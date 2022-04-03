@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 src/vite-env.d.ts
 tmp/*
+.lastDeployment-local
+deploy-to.json

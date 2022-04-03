@@ -696,7 +696,8 @@ export class MinecraftSphere extends LitElement {
   outputMode : number = 1;
 
   /**
-   * The number of times the button has been clicked.
+   * Whether or not to render command block generator commands
+   * regardless of whether there are warnings
    */
   @property({ type: Boolean })
   ignoreWarnings : boolean = false;
@@ -713,6 +714,13 @@ export class MinecraftSphere extends LitElement {
   @property({ reflect: true, type: String })
   objecType : string = 'sphere';
 
+  /**
+   * The angle (from vertical *0*) at which the sphere is considered
+   * complete
+   */
+  @property({ reflect: true, type: Number })
+  stopAngle : number = 0;
+
   // ================================================================
   // START: Private poperties & state
 
@@ -723,7 +731,9 @@ export class MinecraftSphere extends LitElement {
     x: '',
     y: '',
     z: '',
-    thickness: ''
+    thickness: '',
+    height: '',
+    stopAngle: ''
   };
 
   @state()
@@ -764,7 +774,6 @@ export class MinecraftSphere extends LitElement {
       --ease: ease-in-out;
       --line-weight: 0.05rem;
       --line-weight-hvy: .1rem;
-      --line-weight-hvy: 0.1rem;
       --txt-colour: #fff;
       --bg-colour: #2d2b2b;
       --h-font: Arial, Helvetica, sans-serif;
@@ -950,6 +959,37 @@ export class MinecraftSphere extends LitElement {
       box-sizing: border-box;
       font-family: 'Courier New', Courier, monospace;
     }
+
+    p.input {
+      align-items: flex-start;
+      box-sizing: border-box;
+      border-top: var(--line-weight) solid var(--txt-colour);
+      display: flex;
+      margin-top: 0.5rem;
+      padding: 1rem 0 0;
+    }
+    p.input > label {
+      display: inline-block;
+      padding-right: 1rem;
+      text-align: right;
+      width: 9rem;
+    }
+    p.input > input {
+      display: inline-block;
+      // flex-grow: 1;
+      width: 5rem;
+    }
+    button {
+      display: inline-block;
+      padding: 0.5rem 1.25rem;
+      margin-top: 1rem;
+      font-size: 1.5rem;
+      border-radius: 2rem;
+      background-color: #12511c;
+      color: #fff;
+      border: none;
+      box-shadow: 0.2rem 0.2rem 0.75rem rgba(255, 255, 255, 0.2);
+    }
   `
 
 
@@ -966,7 +1006,7 @@ export class MinecraftSphere extends LitElement {
     const x = makePos(this.centreX)
     const y = makePos(this.centreY)
     const z = makePos(this.centreZ)
-    const _tail = 'that some part of the ' + obj + ' will be outside ' +
+    const _tail = ' that some part of the ' + obj + ' will be outside ' +
                   'the world.';
     const _pre =  'You should adjust the ';
     const _post = ' to ensure the whole of the ' + obj + ' is within ' +
@@ -992,7 +1032,9 @@ export class MinecraftSphere extends LitElement {
       x: '',
       y: '',
       z: '',
-      thickness: ''
+      thickness: '',
+      height: '',
+      stopAngle: ''
     };
 
     if (this._doSphere === true) {
@@ -1198,8 +1240,8 @@ export class MinecraftSphere extends LitElement {
   ) : string {
     const prefix = '';
     // const prefix = '/';
-    const cmntPrefix = '// ---------------------------------------' +
-                       '--------\n// ';
+    const cmntPrefix : string = '// ------------------------------' +
+                                   '---------------------------\n// ';
     let output = '';
     let chain = '';
     let cmdCount = 0;
@@ -1277,6 +1319,15 @@ export class MinecraftSphere extends LitElement {
               }) +
               ' minecraft:redstone_block\n';
 
+    output += '\n\n\n' + cmntPrefix.replace(/-/g, '=') + '' +
+              'Manually stop (remove redstone power for commands)' +
+              '\n\n' + prefix + 'setblock' +
+              coordStr({
+                ...firstBlock,
+                y: (firstBlock.y + 1)
+              }) +
+              ' minecraft:air\n';
+
     return output;
   }
 
@@ -1318,7 +1369,7 @@ export class MinecraftSphere extends LitElement {
       end: 'unless ' + {...centre, z: centre.z as number - radius}
     };
 
-    for (let a = 0, c = thickness; c >= 0; c -= 1, a += 1) {
+    for (let a = 0, c = thickness; c > 0; c -= 1, a += 1) {
       if (a > 0 && thickness > 1) {
         cmds.push(
           '// TP back to the previous location to make sure you ' +
@@ -1327,6 +1378,7 @@ export class MinecraftSphere extends LitElement {
           '// Set another layer in the thickness of the sphere'
         );
       }
+
       // Set a block for every level of thickness in the sphere
       cmds.push(
         '// rotate position to be able to set another block on ' +
@@ -1335,6 +1387,7 @@ export class MinecraftSphere extends LitElement {
         blockTypeID
       );
     }
+
     cmds.push(
       '/execute at @p run tp @p' + coordStr(centre) + ' ~ ~' +
       rotation.horizontal + ' ~' + rotation.vertical
@@ -1536,11 +1589,12 @@ export class MinecraftSphere extends LitElement {
       return '';
     } else if (l === 1) {
       return (msgs[0] !== '')
-        ? html`<p class="alert alert-warn">${msgs[0]}</p>`
+        ? html`<p class="alert alert-warn"><strong>Warning:</strong> ${msgs[0].substring(2, 200)}</p>`
         : '';
     } else {
       return html`
         <div class="alert alert-warn">
+          <h3>Warning:</h3>
           <ul>
             ${repeat(
               msgs,
@@ -1552,6 +1606,85 @@ export class MinecraftSphere extends LitElement {
           </ul>
         </div>`
     }
+  }
+
+  /**
+   * Get a single radio button field & label
+   *
+   * @param {label}   label   Label for the input field
+   * @param {number} value Value for the input field
+   * @param {boolean} checked Whether or not the box should be checked
+   *
+   * @returns {TemplateResult}
+   */
+  renderRadioBtn(label: string, value: number, checked: boolean) : TemplateResult {
+    const id = label.toLocaleLowerCase();
+    return html`
+      <li>
+        <input type="radio"
+              id="object-type-${id}"
+              name="object-type"
+              value="${value}"
+              ?checked="${checked}"
+              @change=${this.changeHandler}
+              class="radio-grp__input" />
+        <label for="object-type-${id}"
+              class="radio-grp__label">${label}</label>
+      </li>`;
+  }
+
+  /**
+   * Get a single checkbox field & label
+   *
+   * @param {string}  id      ID of the input field
+   * @param {label}   label   Label for the input field
+   * @param {boolean} checked Whether or not the box should be checked
+   *
+   * @returns {TemplateResult}
+   */
+  renderCbBtn(id: string, label: string, checked: boolean) : TemplateResult {
+    return html`
+      <li>
+        <input type="checkbox"
+               id="${id}"
+               name="${id}"
+               class="cb-btn__input"
+              ?checked=${checked}
+              @change=${this.changeHandler} />
+        <label for="${id}" class="cb-btn__label cb-btn__label--badge">
+          ${label}
+        </label>
+      </li>`;
+  }
+
+  /**
+   * Get a numeric input filed & label
+   *
+   * @param {string} id    ID of the input field
+   * @param {label}  label Label for the input field
+   * @param {number} value Value for the input field
+   * @param {number} min   Minimum allowed value for the field
+   * @param {number} max   Maximum allowed value for the field
+   *
+   * @returns {TemplateResult}
+   */
+  renderNumInput(
+    id: string, label: string, value: number, min: number, max: number, warnings : Array<string>
+  ) : TemplateResult {
+    return html`
+      ${this.renderWarnings(warnings)}
+      <p class="input">
+        <label for="${id}">${label}:</label>
+        <input type="number"
+               id="${id}"
+               name="${id}"
+              .value="${value}"
+               min="${min}"
+               max="${max}"
+               step="1"
+              @change=${this.changeHandler} />
+      </p>
+    `;
   }
 
   /**
@@ -1580,28 +1713,8 @@ export class MinecraftSphere extends LitElement {
           <div class="checkable-grp__wrap radio-grp__wrapper">
               <h3 id="object-type-label" class="checkable-grp__h radio-grp__h">Object type:</h2>
               <ul class="list-clean list-clean--tight list-inline radio-grp__items">
-                <li>
-                  <input type="radio"
-                        id="object-type-sphere"
-                        name="object-type"
-                        value="1"
-                        ?checked="${this._doSphere}"
-                        @change=${this.changeHandler}
-                        class="radio-grp__input" />
-                  <label for="object-type-sphere"
-                        class="radio-grp__label">Sphere</label>
-                </li>
-                <li>
-                  <input type="radio"
-                        id="object-type-cylinder"
-                        name="object-type"
-                        value="0"
-                        ?checked="${!this._doSphere}"
-                        @change=${this.changeHandler}
-                        class="radio-grp__input" />
-                  <label for="object-type-cylinder"
-                        class="radio-grp__label">Cylinder</label>
-                </li>
+                ${this.renderRadioBtn('Sphere', 1, this._doSphere)}
+                ${this.renderRadioBtn('Cylinder', 0, !this._doSphere)}
               </ul>
             </div>
           `
@@ -1630,98 +1743,51 @@ export class MinecraftSphere extends LitElement {
         }
       </p>
 
-      ${this.renderWarnings(this._warningMsgs.radius)}
-
-      <p>
-        <label for="radius">${obj} radius:</label>
-        <input type="number"
-               id="radius"
-               name="radius"
-              .value="${this.radius}"
-               min="${this._rMin}"
-               max="${this.vMax}"
-               step="1"
-              @change=${this.changeHandler} />
-      </p>
-      <p>
-        <label for="thickness">${obj} thickness:</label>
-        <input type="number"
-               id="thickness"
-               name="thickness"
-              .value="${this.thickness}"
-               min="1"
-               max="${(tmp > 1) ? tmp : 1}"
-               step="1"
-              @change=${this.changeHandler} />
-      </p>
+      ${this.renderNumInput(
+        'radius', obj + ' radius',
+        this.radius, this._rMin, this.vMax,
+        this._warningMsgs.radius
+      )}
+      ${this.renderNumInput(
+        'thickness', obj + ' thickness',
+        this.thickness, 1, (tmp > 1) ? tmp : 1,
+        [this._warningMsgs.thickness]
+      )}
       ${(this._doSphere === false)
-        ? html`
-          <p>
-            <label for="height">Cylinder height:</label>
-            <input type="number"
-                  id="height"
-                  name="height"
-                  .value="${this.height}"
-                  min="1"
-                  max="${(tmp > 1) ? tmp : 1}"
-                  step="1"
-                  @change=${this.changeHandler} />
-          </p>`
-        : ''
+        ? this.renderNumInput(
+          'height', 'Cylinder height',
+          this.height, 1, (tmp > 1) ? tmp : 1,
+          [this._warningMsgs.height])
+        : this.renderNumInput(
+          'stop-angle',
+          'Stop angle for sphere (180 = full sphere)',
+          this.stopAngle, 1, 180,
+          [this._warningMsgs.stopAngle])
       }
+
       <h2>${obj} center coordinates</h2>
-      ${this.renderWarnings([this._warningMsgs.x])}
-      <p>
-        <label for="centreX">East/West:</label>
-        <input type="number"
-               id="centreX"
-               name="centreX"
-              .value="${this.centreX}"
-               min="${this.hMax * -1}"
-               max="${this.hMax}"
-               step="1"
-               size="6"
-              @change=${this.changeHandler} />
-      </p>
-      ${this.renderWarnings([this._warningMsgs.z])}
-      <p>
-        <label for="centreZ">Up/Down:</label>
-        <input type="number"
-               id="centreZ"
-               name="centreZ"
-              .value="${this.centreZ}"
-               min="${this.vMax * -1}"
-               max="${this.vMax}"
-               step="1"
-               size="6"
-              @change=${this.changeHandler} />
-      </p>
-      ${this.renderWarnings([this._warningMsgs.y])}
-      <p>
-        <label for="centreY">North/South:</label>
-        <input type="number"
-               id="centreY"
-               name="centreY"
-              .value="${this.centreY}"
-               min="${this.hMax * -1}"
-               max="${this.hMax}"
-               step="1"
-               size="6"
-              @change=${this.changeHandler} />
-      </p>
+      ${this.renderNumInput(
+        'centreX', 'East / West',
+        this.centreX, this.hMax * -1, this.hMax,
+        [this._warningMsgs.x]
+      )}
+      ${this.renderNumInput(
+        'centreZ', 'Up / Down',
+        this.centreZ, this.vMax * -1, this.vMax,
+        [this._warningMsgs.z]
+      )}
+      ${this.renderNumInput(
+        'centreY', 'North / South',
+        this.centreY, this.hMax * -1, this.hMax,
+        [this._warningMsgs.y]
+      )}
+
       <ul class="list-clean checkable-grp__items checkbox-grp__items">
         ${(this._warningCount > 0)
-          ? html`
-            <li>
-              <input type="checkbox" id="ignore-warnings" @change=${this.changeHandler} ?checked=${this.ignoreWarnings} class="cb-btn__input" />
-              <label for="ignore-warnings" class="cb-btn__label cb-btn__label--badge">Ignore warnings</label>
-            </li>`
+          ? this.renderCbBtn('ignore-warnings', 'Ignore warnings', this.ignoreWarnings)
           : ''
         }
-        <li>
-          <input type="checkbox" id="show-comments" @change=${this.changeHandler} ?checked=${this.showExtraComments} class="cb-btn__input" />
-          <label for="show-comments" class="cb-btn__label cb-btn__label--badge">Show extra comments</label>
-        </li>
+        ${this.renderCbBtn('show-comments', 'Show extra comments', this.showExtraComments)}
       </ul>
       ${btn}`
   }

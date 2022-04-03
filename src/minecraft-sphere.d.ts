@@ -25,7 +25,11 @@ export interface IWarnings {
   /** error related Z (Up/Down) axis coordinate */
   z: string,
   /** Error related to thickness of object */
-  thickness: string
+  thickness: string,
+  /** Error related to height of cylinder */
+  height: string,
+  /** Error related to the stop angle of a sphere */
+  stopAngle: string
 }
 
 export interface ICoodinates {

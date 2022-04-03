@@ -6,6 +6,7 @@ import { ICoodinates } from "./minecraft-sphere.d";
  * @returns
  */
 export const ucFirst = (input : string) : string => {
+  // @ts-ignore
   const replacer = (match : string, prefix : string, char : string) : string => {
     return prefix + char.toUpperCase();
   }
