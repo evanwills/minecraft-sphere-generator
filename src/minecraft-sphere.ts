@@ -1381,7 +1381,7 @@ export class MinecraftSphere extends LitElement {
         // TP to the centre of the sphere, facing up
         '/execute at @p run tp @p' + coordStr(centre) +
         ' facing' + coordStr({...centre, z: 320}),
-        '/setblock' + coordStr(firstBlock) + ' ' +
+        '/setblock' + coordStr({...firstBlock, x: firstBlock.x + 1}) + ' ' +
         'minecraft:redstone_block'
       ],
       last: [],

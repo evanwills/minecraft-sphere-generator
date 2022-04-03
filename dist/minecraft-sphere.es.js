@@ -2133,7 +2133,7 @@ let MinecraftSphere = class extends s$1 {
     const oneoffs = {
       first: [
         "/execute at @p run tp @p" + coordStr(centre) + " facing" + coordStr(__spreadProps(__spreadValues({}, centre), { z: 320 })),
-        "/setblock" + coordStr(firstBlock) + " minecraft:redstone_block"
+        "/setblock" + coordStr(__spreadProps(__spreadValues({}, firstBlock), { x: firstBlock.x + 1 })) + " minecraft:redstone_block"
       ],
       last: [],
       end: "unless " + __spreadProps(__spreadValues({}, centre), { z: centre.z - radius })
