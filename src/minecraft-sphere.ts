@@ -990,6 +990,9 @@ export class MinecraftSphere extends LitElement {
       border: none;
       box-shadow: 0.2rem 0.2rem 0.75rem rgba(255, 255, 255, 0.2);
     }
+    option:selected {
+      font-weight: bold;
+    }
   `
 
 
@@ -1142,8 +1145,8 @@ export class MinecraftSphere extends LitElement {
    * normally be triggered by user input
    */
   private _init() : void {
-    console.group('_init()')
     if (this._doInit) {
+      console.group('_init()')
       console.log('doing INIT');
       console.log('this.blockTypeLabel:', this.blockTypeLabel)
       this._doInit = false;
@@ -1152,8 +1155,8 @@ export class MinecraftSphere extends LitElement {
       if (this.blockTypeLabel !== '') {
         this._filterBlockListInner(this.blockTypeLabel);
       }
+      console.groupEnd()
     }
-    console.groupEnd()
   }
 
   /**
@@ -1449,41 +1452,50 @@ export class MinecraftSphere extends LitElement {
    *                   original input if no block could be matched
    */
   private _filterBlockListInner(value : string) : string {
-    // we want to normalise the input value to do more
-    // reliable matching
-    const _value = normalise(value);
-    const filtered = mineCraftBlocks.filter(
-      item => (item.norm.indexOf(_value) > -1)
-    );
-
     let output = value;
-    let l = filtered.length;
 
-    this._filteredBlocks = filtered;
+    if (value !== '') {
+      // console.group('_filterBlockListInner()');
+      // we want to normalise the input value to do more
+      // reliable matching
+      const _value = normalise(value);
+      const filtered = mineCraftBlocks.filter(
+        item => (item.norm.indexOf(_value) > -1)
+      );
+      // console.log('_value:', _value)
+      // console.log('filtered:', filtered)
 
-    if (l === 1) {
-      // This is the only option so let's set it as the chosen option
-      // and clear the filtered list
-      // (If this isn't right the user can start again)
-      this.blockTypeLabel = filtered[0].label;
-      this.blockTypeID = filtered[0].id;
-      this._filteredBlocks = [];
+      let l = filtered.length;
 
-      output = filtered[0].label;
-    } else if (l < 40) {
-      // We don't have a direct match but we have a limited number
-      // of possibilities.
-      // Lets see if we can narrow that down to an exact match
-      const tmp = filtered.filter(item => item.norm === _value);
+      this._filteredBlocks = filtered;
 
-      if (tmp.length === 1) {
-        // We have an exact match. Let's set that as the selected
-        // block type
-        // (The user will still be able to look through the list
-        // of available options)
-        this.blockTypeLabel = tmp[0].label;
-        this.blockTypeID = tmp[0].id;
+      if (l === 1) {
+        // This is the only option so let's set it as the chosen option
+        // and clear the filtered list
+        // (If this isn't right the user can start again)
+        this.blockTypeLabel = filtered[0].label;
+        this.blockTypeID = filtered[0].id;
+        this._filteredBlocks = [];
+        // console.log('we have a winner');
+
+        output = filtered[0].label;
+      } else {
+        // We don't have a direct match but we have a limited number
+        // of possibilities.
+        // Lets see if we can narrow that down to an exact match
+        const tmp = filtered.filter(item => item.norm === _value);
+
+        if (tmp.length === 1) {
+          // We have an exact match. Let's set that as the selected
+          // block type
+          // (The user will still be able to look through the list
+          // of available options)
+          this.blockTypeLabel = tmp[0].label;
+          this.blockTypeID = tmp[0].id;
+          // console.log('we have a match');
+        }
       }
+      // console.groupEnd();
     }
 
     return output;
