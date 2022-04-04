@@ -1237,6 +1237,32 @@ export class MinecraftSphere extends LitElement {
     }
   }
 
+  /**
+   * Generate all the commands (and comments) needed to do all the
+   * work to generate object
+   *
+   * __NOTE:__ This method does not generate the commands that the
+   *           command blocks execute. It only wraps the commands in
+   *           setblock commands.
+   *           It does add a (optional) TP command to teleport you to
+   *           where the command blocks are set so you can see what's
+   *           going on. Plus a fill command to clear all the command
+   *           blocks & redstone power blocks to end the generation
+   *           process.
+   *
+   * @param firstBlock   Coordinates for the position of first command
+   *                     block
+   * @param commands     List of commands that need to be generated
+   * @param totalRepeats The total number of times the commands have
+   *                     to be run in each repeat cycle.
+   *                     (Used for working out how many times the
+   *                      commands need to be cloned)
+   * @param oneoffs      List of commands that are only executed once
+   *
+   * @returns Plain text of all the commands (in order of execution)
+   *          plus any comments to help identify what each command is
+   *          for.
+   */
   private _generateSetBlocks(
     firstBlock : ICoodinates,
     commands : Array<string>,
@@ -1324,6 +1350,7 @@ export class MinecraftSphere extends LitElement {
     //   ? 1
     //   : -1;
     _x = 0;
+
     // generate clone commands
     for (let a = 1; a < totalRepeats; a *= 2) {
       output += (this.showExtraComments)
@@ -1382,7 +1409,7 @@ export class MinecraftSphere extends LitElement {
   }
 
   /**
-   * Generate the commands used for generating a sphere
+   * Generate the list of commands used for generating a sphere
    *
    * @param {ICoodinates} centre      Coordinates for the centre of
    *                                  the sphere
@@ -1391,6 +1418,9 @@ export class MinecraftSphere extends LitElement {
    *                                  sphere
    * @param {string}      blockTypeID ID of block type to build the
    *                                  sphere
+   * @param {number}      stopAngle   The angle (from straight up)
+   *                                  at which stop generating the
+   *                                  sphere
    *
    * @returns {string} List of commands to run in Minecraft
    */
@@ -1398,7 +1428,8 @@ export class MinecraftSphere extends LitElement {
     centre : ICoodinates,
     radius : number,
     thickness : number,
-    blockTypeID : string
+    blockTypeID : string,
+    stopAngle : number = 0
   ) : string {
     const rotation = this._getRotation(radius);
     const cmds : Array<string> = [];
@@ -1452,11 +1483,36 @@ export class MinecraftSphere extends LitElement {
     return this._generateSetBlocks(firstBlock, cmds, radius * radius, oneoffs);
   }
 
+
+  /**
+   * Generate the list of commands used for generating a cylinder
+   *
+   * @param {ICoodinates} centre      Coordinates for the centre of
+   *                                  the sphere
+   * @param {number}      radius      Radius of the sphere
+   * @param {number}      thickness   Thickness of the wall of the
+   *                                  sphere
+   * @param {string}      blockTypeID ID of block type to build the
+   *                                  sphere
+   * @param {number}      length      The angle (from straight up)
+   *                                  at which stop generating the
+   *                                  sphere
+   * @param {number}      zAngle      The angle from straight up for
+   *                                  building direction of the
+   *                                  cylinder
+   * @param {number}      xyAngle     Horizontal angle for building
+   *                                  the direction the cylinder
+   *
+   * @returns {string} List of commands to run in Minecraft
+   */
   private _generateCylinder(
     centre : ICoodinates,
     radius : number,
     thickness : number,
-    blockTypeID : string
+    blockTypeID : string,
+    length: number = 0,
+    zAngle: number = 0,
+    xyAngle: number = 0
   ) : string {
     const rotation = this._getRotation(radius);
     const cmds : Array<string> = [];
@@ -1875,13 +1931,15 @@ export class MinecraftSphere extends LitElement {
             _centre,
             this.radius,
             this.thickness,
-            this.blockTypeID
+            this.blockTypeID,
+            this.stopAngle
           )
         : this._generateCylinder(
             _centre,
             this.radius,
             this.thickness,
-            this.blockTypeID
+            this.blockTypeID,
+            this.height
           )
       }</textarea>
       <button id="modify"
