@@ -1450,16 +1450,20 @@ export class MinecraftSphere extends LitElement {
   /**
    * Generate the list of commands used for generating a sphere
    *
-   * @param {ICoodinates} centre      Coordinates for the centre of
-   *                                  the sphere
-   * @param {number}      radius      Radius of the sphere
-   * @param {number}      thickness   Thickness of the wall of the
-   *                                  sphere
-   * @param {string}      blockTypeID ID of block type to build the
-   *                                  sphere
-   * @param {number}      stopAngle   The angle (from straight up)
-   *                                  at which stop generating the
-   *                                  sphere
+   * @param {ICoodinates} centre       Coordinates for the centre of
+   *                                   the sphere
+   * @param {number}      radius       Radius of the sphere
+   * @param {number}      thickness    Thickness of the wall of the
+   *                                   sphere
+   * @param {string}      blockTypeID  ID of block type to build the
+   *                                   sphere
+   * @param {boolean}     fillWithAir  Fill the inside of the sphere
+   *                                   with air
+   * @param {boolean}     hollowCentre Make sure the centre of the
+   *                                   sphere is hollow
+   * @param {number}      stopAngle    The angle (from straight up)
+   *                                   at which stop generating the
+   *                                   sphere
    *
    * @returns {string} List of commands to run in Minecraft
    */
@@ -1470,7 +1474,7 @@ export class MinecraftSphere extends LitElement {
     blockTypeID : string,
     fillWithAir: boolean = false,
     hollowCentre : boolean = false,
-    stopAngle : number = 0
+    stopAngle : number = 180
   ) : string {
     const rotation = this._getRotation(radius);
     const cmds : Array<string> = [];
@@ -1547,21 +1551,25 @@ export class MinecraftSphere extends LitElement {
   /**
    * Generate the list of commands used for generating a cylinder
    *
-   * @param {ICoodinates} centre      Coordinates for the centre of
-   *                                  the sphere
-   * @param {number}      radius      Radius of the sphere
-   * @param {number}      thickness   Thickness of the wall of the
-   *                                  sphere
-   * @param {string}      blockTypeID ID of block type to build the
-   *                                  sphere
-   * @param {number}      length      The angle (from straight up)
-   *                                  at which stop generating the
-   *                                  sphere
-   * @param {number}      zAngle      The angle from straight up for
-   *                                  building direction of the
-   *                                  cylinder
-   * @param {number}      xyAngle     Horizontal angle for building
-   *                                  the direction the cylinder
+   * @param {ICoodinates} centre       Coordinates for the centre of
+   *                                   the sphere
+   * @param {number}      radius       Radius of the sphere
+   * @param {number}      thickness    Thickness of the wall of the
+   *                                   sphere
+   * @param {string}      blockTypeID  ID of block type to build the
+   *                                   sphere
+   * @param {boolean}     fillWithAir  Fill the inside of the sphere
+   *                                   with air
+   * @param {boolean}     hollowCentre Make sure the centre of the
+   *                                   sphere is hollow
+   * @param {number}      length       The angle (from straight up)
+   *                                   at which stop generating the
+   *                                   sphere
+   * @param {number}      zAngle       The angle from straight up for
+   *                                   building direction of the
+   *                                   cylinder
+   * @param {number}      xyAngle      Horizontal angle for building
+   *                                   the direction the cylinder
    *
    * @returns {string} List of commands to run in Minecraft
    */
@@ -1570,6 +1578,8 @@ export class MinecraftSphere extends LitElement {
     radius : number,
     thickness : number,
     blockTypeID : string,
+    fillWithAir: boolean = false,
+    hollowCentre : boolean = false,
     length: number = 0,
     zAngle: number = 0,
     xyAngle: number = 0
