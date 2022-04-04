@@ -29,16 +29,25 @@ export interface IWarnings {
   /** Error related to height of cylinder */
   height: string,
   /** Error related to the stop angle of a sphere */
-  stopAngle: string
+  stopAngle: string,
+  cmdBlockHeight: string
 }
 
-export interface ICoodinates {
+export interface ICoodinatesBase {
   /** X (East/West) axis coordinate */
   x: number,
   /** Y (North/South) axis coordinate */
   y: number,
   /** Z (Up/Down) axis coordinate */
   z: number|string
+}
+export interface ICoodinates extends ICoodinatesBase {
+  /** X (East/West) axis coordinate */
+  x: number,
+  /** Y (North/South) axis coordinate */
+  y: number,
+  /** Z (Up/Down) axis coordinate */
+  z: number
 }
 
 export interface IOneOffCmds {

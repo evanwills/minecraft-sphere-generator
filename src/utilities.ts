@@ -1,4 +1,4 @@
-import { ICoodinates } from "./minecraft-sphere.d";
+import { ICoodinatesBase } from "./minecraft-sphere.d";
 /**
  * Make the first leter in a string upper case
  *
@@ -44,7 +44,7 @@ export const normalise = (input : string) : string => {
  * @returns {string} String in the format " X Z Y"
  *                  (Note: string includes a leading space)
  */
-export const coordStr = (coordinates : ICoodinates) : string => {
+export const coordStr = (coordinates : ICoodinatesBase) : string => {
   return ' ' + coordinates.x.toString() +
          ' ' + coordinates.z.toString() +
          ' ' + coordinates.y.toString();

@@ -1,6 +1,8 @@
 import { html, css, LitElement, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
+// import { unsafeHTML } from 'lit/directives/unsafe-html.js';
+import { ifDefined } from 'lit/directives/if-defined.js';
 import { IBlockType, ICmdReturn, ICoodinates, IOneOffCmds, IRotation, IWarnings } from './minecraft-sphere.d';
 import { ucFirst, makePos, normalise, coordStr } from './utilities';
 
@@ -709,6 +711,19 @@ export class MinecraftSphere extends LitElement {
   showExtraComments : boolean = false;
 
   /**
+   * Whether or not to fill the object with air as it's being built
+   */
+  @property({ type: Boolean })
+  fillWithAir : boolean = false;
+
+  /**
+   * Whether or not to fill the centre of the object with air before
+   * starting to generate the object
+   */
+  @property({ type: Boolean })
+  hollowCentre : boolean = false;
+
+  /**
    * The type of object to be created.
    */
   @property({ reflect: true, type: String })
@@ -719,7 +734,14 @@ export class MinecraftSphere extends LitElement {
    * complete
    */
   @property({ reflect: true, type: Number })
-  stopAngle : number = 0;
+  stopAngle : number = 180;
+
+  /**
+   * The vertical position where command blocks are placed so they
+   * don't interfear with other things
+   */
+  @property({ reflect: true, type: Number })
+  cmdBlockHeight : number = 317;
 
   // ================================================================
   // START: Private poperties & state
@@ -733,7 +755,8 @@ export class MinecraftSphere extends LitElement {
     z: '',
     thickness: '',
     height: '',
-    stopAngle: ''
+    stopAngle: '',
+    cmdBlockHeight: ''
   };
 
   @state()
@@ -882,6 +905,7 @@ export class MinecraftSphere extends LitElement {
       padding: 0.2rem 1.75rem;
       position: relative;
       text-align: center;
+      margin: 1rem 0;
     }
     .cb-btn__label--centre {
       margin: 0.1rem auto;
@@ -961,10 +985,13 @@ export class MinecraftSphere extends LitElement {
     }
 
     p.input {
-      align-items: flex-start;
+      // align-items: flex-start;
       box-sizing: border-box;
       border-top: var(--line-weight) solid var(--txt-colour);
-      display: flex;
+      display: grid;
+      grid-template-areas: 'label' 'input' 'description';
+      row-gap: 0.5rem;
+      column-gap: 0.5rem;
       margin-top: 0.5rem;
       padding: 1rem 0 0;
     }
@@ -972,12 +999,17 @@ export class MinecraftSphere extends LitElement {
       display: inline-block;
       padding-right: 1rem;
       text-align: right;
-      width: 9rem;
+      width: 100%;
+      grid-area: label;
     }
     p.input > input {
       display: inline-block;
       // flex-grow: 1;
       width: 5rem;
+      grid-area: input;
+    }
+    .input__desc {
+      grid-area: description;
     }
     button {
       display: inline-block;
@@ -992,6 +1024,12 @@ export class MinecraftSphere extends LitElement {
     }
     option:selected {
       font-weight: bold;
+    }
+    @media screen and (min-width: 48rem) {
+      p.input {
+        grid-template-areas: 'label input' 'label description';
+        grid-template-columns: 10rem 1fr;
+      }
     }
   `
 
@@ -1037,7 +1075,8 @@ export class MinecraftSphere extends LitElement {
       z: '',
       thickness: '',
       height: '',
-      stopAngle: ''
+      stopAngle: '',
+      cmdBlockHeight: ''
     };
 
     if (this._doSphere === true) {
@@ -1274,7 +1313,7 @@ export class MinecraftSphere extends LitElement {
     const cmntPrefix : string = '// ------------------------------' +
                                    '---------------------------\n// ';
     let output = '';
-    let cmdCount = 0;
+    // let cmdCount = 0;
     let _chain = '';
     let _x = 0;
     let _y = 0;
@@ -1429,6 +1468,8 @@ export class MinecraftSphere extends LitElement {
     radius : number,
     thickness : number,
     blockTypeID : string,
+    fillWithAir: boolean = false,
+    hollowCentre : boolean = false,
     stopAngle : number = 0
   ) : string {
     const rotation = this._getRotation(radius);
@@ -1453,6 +1494,15 @@ export class MinecraftSphere extends LitElement {
       end: 'unless ' + {...centre, z: centre.z as number - radius}
     };
 
+    if (hollowCentre === true) {
+      oneoffs.first = [
+        '// Make sure the centre of where you\'re building your ' +
+           'object is only air',
+        '/fill' + coordStr({x: centre.x - 1, y: centre.y - 1, z: centre.z - 1}) + coordStr({x: centre.x + 1, y: centre.y + 1, z: centre.z + 2}) + 'minecraft:air',
+        ...oneoffs.first
+      ]
+    }
+
     for (let a = 0, c = thickness; c > 0; c -= 1, a += 1) {
       let msg = '// Set the outer a block for the outer layer of the sphere';
       if (a > 0 && thickness > 1) {
@@ -1471,6 +1521,16 @@ export class MinecraftSphere extends LitElement {
         '/execute at @p run setblock ^ ^ ^' + (radius - a) + ' minecraft:' +
         blockTypeID
       );
+    }
+    if (fillWithAir === true) {
+      for (let a = radius - thickness; a > 0; a -= 1) {
+        cmds.push(
+          '// TP back to the previous location to make sure you ' +
+          'haven\'t fallen below the appropriate point',
+          '/execute at @p run tp @p' + coordStr(centre) + ' ~ ~',
+          '/execute at @p run setblock ^ ^ ^' + a + ' minecraft:air'
+        );
+      }
     }
 
     cmds.push(
@@ -1677,6 +1737,14 @@ export class MinecraftSphere extends LitElement {
         this.showExtraComments = input.checked;
         break;
 
+      case 'fill-with-air':
+        this.fillWithAir = input.checked;
+        break;
+
+      case 'hollow-centre':
+        this.hollowCentre = input.checked;
+        break;
+
       case 'object-type-sphere':
       case 'object-type-cylinder':
         this._doSphere = val === 1;
@@ -1763,7 +1831,10 @@ export class MinecraftSphere extends LitElement {
    *
    * @returns {TemplateResult}
    */
-  renderCbBtn(id: string, label: string, checked: boolean) : TemplateResult {
+  renderCbBtn(id: string, label: string, checked: boolean, title: string = '') : TemplateResult {
+    const _title = (title !== '')
+      ? title
+      : undefined
     return html`
       <li>
         <input type="checkbox"
@@ -1772,7 +1843,9 @@ export class MinecraftSphere extends LitElement {
                class="cb-btn__input"
               ?checked=${checked}
               @change=${this.changeHandler} />
-        <label for="${id}" class="cb-btn__label cb-btn__label--badge">
+        <label for="${id}"
+               class="cb-btn__label cb-btn__label--badge"
+               title="${ifDefined(_title)}">
           ${label}
         </label>
       </li>`;
@@ -1781,16 +1854,19 @@ export class MinecraftSphere extends LitElement {
   /**
    * Get a numeric input filed & label
    *
-   * @param {string} id    ID of the input field
-   * @param {label}  label Label for the input field
-   * @param {number} value Value for the input field
-   * @param {number} min   Minimum allowed value for the field
-   * @param {number} max   Maximum allowed value for the field
+   * @param {string} id          ID of the input field
+   * @param {label}  label       Label for the input field
+   * @param {number} value       Value for the input field
+   * @param {number} min         Minimum allowed value for the field
+   * @param {number} max         Maximum allowed value for the field
+   * @param {number} warnings    Warning message for this field
+   * @param {string} description Helpful info about the purpose of
+   *                             the field
    *
    * @returns {TemplateResult}
    */
   renderNumInput(
-    id: string, label: string, value: number, min: number, max: number, warnings : Array<string>
+    id: string, label: string, value: number, min: number, max: number, warnings : Array<string>, description: string = ''
   ) : TemplateResult {
     return html`
       ${this.renderWarnings(warnings)}
@@ -1804,6 +1880,10 @@ export class MinecraftSphere extends LitElement {
                max="${max}"
                step="1"
               @change=${this.changeHandler} />
+        ${(description !== '')
+          ? html`<span class="input__desc">${description}</span>`
+          : ''
+        }
       </p>
     `;
   }
@@ -1883,7 +1963,9 @@ export class MinecraftSphere extends LitElement {
           'stop-angle',
           'Stop angle for sphere (180 = full sphere)',
           this.stopAngle, 1, 180,
-          [this._warningMsgs.stopAngle])
+          [this._warningMsgs.stopAngle],
+          'The angle (from "straight up") when the sphere stops being generated. Used for creating domes and parts of a sphere'
+        )
       }
 
       <h2>${obj} center coordinates</h2>
@@ -1908,8 +1990,30 @@ export class MinecraftSphere extends LitElement {
           ? this.renderCbBtn('ignore-warnings', 'Ignore warnings', this.ignoreWarnings)
           : ''
         }
-        ${this.renderCbBtn('show-comments', 'Show extra comments', this.showExtraComments)}
+        ${this.renderCbBtn(
+          'fill-with-air',
+          'Fill ' + this.objecType + ' with air',
+          this.fillWithAir,
+          'If your ' + this.objecType + ' partially or completely occupies a space that is already occupied by other block types, this insures it is hollow.\n(NOTE: This could significantly increase the build time.)'
+        )}
+        ${this.renderCbBtn(
+          'hollow-centre',
+          'Make sure centre of ' + this.objecType + ' is filled with air',
+          this.hollowCentre,
+          'Make sure the centre of your ' + this.objecType + ' is empty, this insures that you have a place to stand when creating the ' + this.objecType + '.\n(NOTE: Only use this if you know the centre of your ' + this.objecType + ' is inside existing non-air/non-water blocks.)'
+        )}
+        ${this.renderCbBtn(
+          'show-comments',
+          'Show extra comments',
+          this.showExtraComments
+        )}
       </ul>
+      ${this.renderNumInput(
+        'cmdBlockHeight', 'Command block vertical height',
+        this.cmdBlockHeight, this.vMax * -1, this.vMax,
+        [this._warningMsgs.cmdBlockHeight],
+        'The altitude command blocks are placed so they don\'t interfear with other blocks when they are set and removed'
+      )}
       ${btn}`
   }
 
@@ -1932,6 +2036,8 @@ export class MinecraftSphere extends LitElement {
             this.radius,
             this.thickness,
             this.blockTypeID,
+            this.fillWithAir,
+            this.hollowCentre,
             this.stopAngle
           )
         : this._generateCylinder(
