@@ -2101,7 +2101,7 @@ let MinecraftSphere = class extends s$1 {
     let output = "";
     let _chain = "";
     let _x = 0;
-    let _y = firstBlock.y + 1;
+    let _y = firstBlock.y + 2;
     let _auto = "";
     for (let a2 = 0, c2 = oneoffs.first.length; a2 < c2; a2 += 1) {
       const tmp = this._getCmdCmnt(oneoffs.first[a2], prefix + "setblock" + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
