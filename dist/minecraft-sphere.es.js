@@ -2093,6 +2093,13 @@ let MinecraftSphere = class extends s$1 {
       z: Math.round(this.centreZ)
     };
   }
+  _getFillCentre() {
+    return {
+      x: Math.round(this.centreX),
+      y: Math.round(this.centreY),
+      z: Math.round(this.centreZ)
+    };
+  }
   _generateSetBlocks(commands, oneoffs = { first: [], last: [], end: "" }) {
     const firstBlock = this._getFirstBlock();
     const totalRepeats = 2 * Math.PI * this.radius * 1.4;
@@ -2162,6 +2169,7 @@ let MinecraftSphere = class extends s$1 {
   }
   _generateSphere() {
     const centre = this._getCentre();
+    const _fillCentre = this._getFillCentre();
     const rotation = this._getRotation();
     const cmds = [];
     const firstBlock = this._getFirstBlock();
@@ -2178,7 +2186,15 @@ let MinecraftSphere = class extends s$1 {
     if (this.hollowCentre === true) {
       oneoffs.first = [
         "// Make sure the centre of where you're building your object is only air",
-        "/fill" + coordStr({ x: centre.x - 1, y: centre.y - 1, z: centre.z - 1 }) + coordStr({ x: centre.x + 1, y: centre.y + 1, z: centre.z + 2 }) + " minecraft:air",
+        "/fill" + coordStr({
+          x: _fillCentre.x - 1,
+          y: _fillCentre.y - 1,
+          z: _fillCentre.z - 1
+        }) + coordStr({
+          x: _fillCentre.x + 1,
+          y: _fillCentre.y + 1,
+          z: _fillCentre.z + 2
+        }) + " minecraft:air",
         ...oneoffs.first
       ];
     }

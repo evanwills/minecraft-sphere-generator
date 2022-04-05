@@ -1315,6 +1315,20 @@ export class MinecraftSphere extends LitElement {
   }
 
   /**
+   * Get the x, y & z coordinates for the centre of the sphere or
+   * centre of the start of the cylinder
+   *
+   * @returns
+   */
+  private _getFillCentre() : ICoodinates {
+    return {
+      x: Math.round(this.centreX),
+      y: Math.round(this.centreY),
+      z: Math.round(this.centreZ)
+    };
+  }
+
+  /**
    * Generate all the commands (and comments) needed to do all the
    * work to generate object
    *
@@ -1508,6 +1522,7 @@ export class MinecraftSphere extends LitElement {
    */
   private _generateSphere() : string {
     const centre = this._getCentre();
+    const _fillCentre = this._getFillCentre();
     const rotation = this._getRotation();
     const cmds : Array<string> = [];
     const firstBlock : ICoodinates = this._getFirstBlock()
@@ -1530,7 +1545,15 @@ export class MinecraftSphere extends LitElement {
       oneoffs.first = [
         '// Make sure the centre of where you\'re building your ' +
            'object is only air',
-        '/fill' + coordStr({x: centre.x - 1, y: centre.y - 1, z: centre.z - 1}) + coordStr({x: centre.x + 1, y: centre.y + 1, z: centre.z + 2}) + ' minecraft:air',
+        '/fill' + coordStr({
+          x: _fillCentre.x - 1,
+          y: _fillCentre.y - 1,
+          z: _fillCentre.z - 1
+        }) + coordStr({
+          x: _fillCentre.x + 1,
+          y: _fillCentre.y + 1,
+          z: _fillCentre.z + 2
+        }) + ' minecraft:air',
         ...oneoffs.first
       ]
     }

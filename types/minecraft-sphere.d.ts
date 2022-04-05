@@ -160,6 +160,13 @@ export declare class MinecraftSphere extends LitElement {
      */
     private _getCentre;
     /**
+     * Get the x, y & z coordinates for the centre of the sphere or
+     * centre of the start of the cylinder
+     *
+     * @returns
+     */
+    private _getFillCentre;
+    /**
      * Generate all the commands (and comments) needed to do all the
      * work to generate object
      *
