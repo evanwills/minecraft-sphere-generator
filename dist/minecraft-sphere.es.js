@@ -2145,7 +2145,7 @@ let MinecraftSphere = class extends s$1 {
       }));
       _len += _len;
       _x = firstBlock.x + _len;
-      if (_len > 512) {
+      if (_len > 400) {
         break;
       }
     }

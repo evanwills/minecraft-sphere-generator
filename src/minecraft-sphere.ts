@@ -1448,7 +1448,7 @@ export class MinecraftSphere extends LitElement {
       _len += _len
       _x = (firstBlock.x + _len)
 
-      if (_len > 512) {
+      if (_len > 400) {
         // We don't want too many blocks in a line.
         // better stop cloning here.
         break;
