@@ -91,7 +91,7 @@ const e$4 = window.trustedTypes, r$1 = e$4 ? e$4.emptyScript : "", h$1 = window.
       }
   }
   return s2;
-} }, n$4 = (t2, i2) => i2 !== t2 && (i2 == i2 || t2 == t2), l$2 = { attribute: true, type: String, converter: o$2, reflect: false, hasChanged: n$4 };
+} }, n$4 = (t2, i2) => i2 !== t2 && (i2 == i2 || t2 == t2), l$3 = { attribute: true, type: String, converter: o$2, reflect: false, hasChanged: n$4 };
 class a$2 extends HTMLElement {
   constructor() {
     super(), this._$Et = /* @__PURE__ */ new Map(), this.isUpdatePending = false, this.hasUpdated = false, this._$Ei = null, this.o();
@@ -108,7 +108,7 @@ class a$2 extends HTMLElement {
       e2 !== void 0 && (this._$Eu.set(e2, s2), t2.push(e2));
     }), t2;
   }
-  static createProperty(t2, i2 = l$2) {
+  static createProperty(t2, i2 = l$3) {
     if (i2.state && (i2.attribute = false), this.finalize(), this.elementProperties.set(t2, i2), !i2.noAccessor && !this.prototype.hasOwnProperty(t2)) {
       const s2 = typeof t2 == "symbol" ? Symbol() : "__" + t2, e2 = this.getPropertyDescriptor(t2, s2, i2);
       e2 !== void 0 && Object.defineProperty(this.prototype, t2, e2);
@@ -123,7 +123,7 @@ class a$2 extends HTMLElement {
     }, configurable: true, enumerable: true };
   }
   static getPropertyOptions(t2) {
-    return this.elementProperties.get(t2) || l$2;
+    return this.elementProperties.get(t2) || l$3;
   }
   static finalize() {
     if (this.hasOwnProperty("finalized"))
@@ -192,7 +192,7 @@ class a$2 extends HTMLElement {
   attributeChangedCallback(t2, i2, s2) {
     this._$AK(t2, s2);
   }
-  _$ES(t2, i2, s2 = l$2) {
+  _$ES(t2, i2, s2 = l$3) {
     var e2, r2;
     const h2 = this.constructor._$Eh(t2, s2);
     if (h2 !== void 0 && s2.reflect === true) {
@@ -278,7 +278,7 @@ a$2.finalized = true, a$2.elementProperties = /* @__PURE__ */ new Map(), a$2.ele
  * SPDX-License-Identifier: BSD-3-Clause
  */
 var t$2;
-const i$3 = globalThis.trustedTypes, s$2 = i$3 ? i$3.createPolicy("lit-html", { createHTML: (t2) => t2 }) : void 0, e$3 = `lit$${(Math.random() + "").slice(9)}$`, o$1 = "?" + e$3, n$3 = `<${o$1}>`, l$1 = document, h = (t2 = "") => l$1.createComment(t2), r = (t2) => t2 === null || typeof t2 != "object" && typeof t2 != "function", d = Array.isArray, u$2 = (t2) => {
+const i$3 = globalThis.trustedTypes, s$2 = i$3 ? i$3.createPolicy("lit-html", { createHTML: (t2) => t2 }) : void 0, e$3 = `lit$${(Math.random() + "").slice(9)}$`, o$1 = "?" + e$3, n$3 = `<${o$1}>`, l$2 = document, h = (t2 = "") => l$2.createComment(t2), r = (t2) => t2 === null || typeof t2 != "object" && typeof t2 != "function", d = Array.isArray, u$2 = (t2) => {
   var i2;
   return d(t2) || typeof ((i2 = t2) === null || i2 === void 0 ? void 0 : i2[Symbol.iterator]) == "function";
 }, c$2 = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, v = /-->/g, a$1 = />/g, f$1 = />|[ 	\n\r](?:([^\s"'>=/]+)([ 	\n\r]*=[ 	\n\r]*(?:[^ 	\n\r"'`<>=]|("|')|))|$)/g, _ = /'/g, m$1 = /"/g, g = /^(?:script|style|textarea|title)$/i, p = (t2) => (i2, ...s2) => ({ _$litType$: t2, strings: i2, values: s2 }), $ = p(1), b = Symbol.for("lit-noChange"), w = Symbol.for("lit-nothing"), T = /* @__PURE__ */ new WeakMap(), x = (t2, i2, s2) => {
@@ -290,7 +290,7 @@ const i$3 = globalThis.trustedTypes, s$2 = i$3 ? i$3.createPolicy("lit-html", { 
     n2._$litPart$ = l2 = new N(i2.insertBefore(h(), t3), t3, void 0, s2 != null ? s2 : {});
   }
   return l2._$AI(t2), l2;
-}, A = l$1.createTreeWalker(l$1, 129, null, false), C = (t2, i2) => {
+}, A = l$2.createTreeWalker(l$2, 129, null, false), C = (t2, i2) => {
   const o2 = t2.length - 1, l2 = [];
   let h2, r2 = i2 === 2 ? "<svg>" : "", d2 = c$2;
   for (let i3 = 0; i3 < o2; i3++) {
@@ -353,7 +353,7 @@ class E {
     }
   }
   static createElement(t2, i2) {
-    const s2 = l$1.createElement("template");
+    const s2 = l$2.createElement("template");
     return s2.innerHTML = t2, s2;
   }
 }
@@ -377,7 +377,7 @@ class V {
   }
   p(t2) {
     var i2;
-    const { el: { content: s2 }, parts: e2 } = this._$AD, o2 = ((i2 = t2 == null ? void 0 : t2.creationScope) !== null && i2 !== void 0 ? i2 : l$1).importNode(s2, true);
+    const { el: { content: s2 }, parts: e2 } = this._$AD, o2 = ((i2 = t2 == null ? void 0 : t2.creationScope) !== null && i2 !== void 0 ? i2 : l$2).importNode(s2, true);
     A.currentNode = o2;
     let n2 = A.nextNode(), h2 = 0, r2 = 0, d2 = e2[0];
     for (; d2 !== void 0; ) {
@@ -425,7 +425,7 @@ class N {
     this._$AH !== t2 && (this._$AR(), this._$AH = this.A(t2));
   }
   $(t2) {
-    this._$AH !== w && r(this._$AH) ? this._$AA.nextSibling.data = t2 : this.k(l$1.createTextNode(t2)), this._$AH = t2;
+    this._$AH !== w && r(this._$AH) ? this._$AA.nextSibling.data = t2 : this.k(l$2.createTextNode(t2)), this._$AH = t2;
   }
   T(t2) {
     var i2;
@@ -539,7 +539,7 @@ z == null || z(E, N), ((t$2 = globalThis.litHtmlVersions) !== null && t$2 !== vo
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-var l, o;
+var l$1, o;
 class s$1 extends a$2 {
   constructor() {
     super(...arguments), this.renderOptions = { host: this }, this._$Dt = void 0;
@@ -565,7 +565,7 @@ class s$1 extends a$2 {
     return b;
   }
 }
-s$1.finalized = true, s$1._$litElement$ = true, (l = globalThis.litElementHydrateSupport) === null || l === void 0 || l.call(globalThis, { LitElement: s$1 });
+s$1.finalized = true, s$1._$litElement$ = true, (l$1 = globalThis.litElementHydrateSupport) === null || l$1 === void 0 || l$1.call(globalThis, { LitElement: s$1 });
 const n$2 = globalThis.litElementPolyfillSupport;
 n$2 == null || n$2({ LitElement: s$1 });
 ((o = globalThis.litElementVersions) !== null && o !== void 0 ? o : globalThis.litElementVersions = []).push("3.2.0");
@@ -741,6 +741,12 @@ const u = (e2, s2, t2) => {
     return this.ut = v2, s(s$12, m$12), b;
   }
 });
+/**
+ * @license
+ * Copyright 2018 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+const l = (l2) => l2 != null ? l2 : w;
 const ucFirst = (input) => {
   const replacer = (match, prefix, char) => {
     return prefix + char.toUpperCase();
@@ -1900,7 +1906,7 @@ let MinecraftSphere = class extends s$1 {
     super(...arguments);
     this.radius = 0;
     this.thickness = 1;
-    this.height = 1;
+    this.length = 1;
     this.blockTypeLabel = "";
     this.blockTypeID = "";
     this.centreX = 0;
@@ -1912,8 +1918,11 @@ let MinecraftSphere = class extends s$1 {
     this.outputMode = 1;
     this.ignoreWarnings = false;
     this.showExtraComments = false;
+    this.fillWithAir = false;
+    this.hollowCentre = false;
     this.objecType = "sphere";
-    this.stopAngle = 0;
+    this.stopAngle = 180;
+    this.cmdBlockHeight = 317;
     this._warningMsgs = {
       general: [],
       radius: [],
@@ -1921,8 +1930,9 @@ let MinecraftSphere = class extends s$1 {
       y: "",
       z: "",
       thickness: "",
-      height: "",
-      stopAngle: ""
+      length: "",
+      stopAngle: "",
+      cmdBlockHeight: ""
     };
     this.radiusError = "";
     this.thicknessError = "";
@@ -1962,8 +1972,9 @@ let MinecraftSphere = class extends s$1 {
       y: "",
       z: "",
       thickness: "",
-      height: "",
-      stopAngle: ""
+      length: "",
+      stopAngle: "",
+      cmdBlockHeight: ""
     };
     if (this._doSphere === true) {
       if (this.radius > 75) {
@@ -2021,16 +2032,12 @@ let MinecraftSphere = class extends s$1 {
   }
   _init() {
     if (this._doInit) {
-      console.group("_init()");
-      console.log("doing INIT");
-      console.log("this.blockTypeLabel:", this.blockTypeLabel);
       this._doInit = false;
       this._doSphere = this.outputMode !== 3;
       this._setWarnings();
       if (this.blockTypeLabel !== "") {
         this._filterBlockListInner(this.blockTypeLabel);
       }
-      console.groupEnd();
     }
   }
   _canGenerate() {
@@ -2047,7 +2054,9 @@ let MinecraftSphere = class extends s$1 {
     } else {
       _tmp = output.replace("[[CMD]]", input);
       _chain = "chain_";
-      _c = 1;
+      if (output !== "") {
+        _c = 1;
+      }
     }
     return {
       output: _tmp,
@@ -2055,26 +2064,41 @@ let MinecraftSphere = class extends s$1 {
       count: _c
     };
   }
-  _getRotation(radius, floor = true) {
+  _getRotation(floor = true) {
+    const _vert = 50 / this.radius;
+    const _hori = Math.pow(_vert, 2) / 360;
     if (floor === true) {
-      const horizontal = Math.floor(50 / radius * 1e4) / 1e4;
       return {
-        horizontal,
-        vertical: Math.floor(horizontal * horizontal / 360 * 1e4) / 1e4
+        horizontal: Math.floor(_vert * 1e4) / 1e4,
+        vertical: Math.floor(_hori * 1e4) / 1e4
       };
     } else {
-      const horizontal = Math.ceil(50 / radius * 1e4) / 1e4;
       return {
-        horizontal,
-        vertical: Math.ceil(horizontal * horizontal / 360 * 1e4) / 1e4
+        horizontal: Math.ceil(_vert * 1e4) / 1e4,
+        vertical: Math.ceil(_hori * 1e4) / 1e4
       };
     }
   }
-  _generateSetBlocks(firstBlock, commands, totalRepeats, oneoffs = { first: [], last: [], end: "" }) {
+  _getFirstBlock() {
+    return {
+      x: Math.ceil(this.centreX + this.radius * 0.75),
+      y: Math.ceil(this.centreY + this.radius * 0.75),
+      z: this.vMax - 3
+    };
+  }
+  _getCentre() {
+    return {
+      x: Math.round(this.centreX) + 0.5,
+      y: Math.round(this.centreY) + 0.5,
+      z: Math.round(this.centreZ)
+    };
+  }
+  _generateSetBlocks(commands, oneoffs = { first: [], last: [], end: "" }) {
+    const firstBlock = this._getFirstBlock();
+    const totalRepeats = 2 * Math.PI * this.radius * 1.4;
     const prefix = "";
     const cmntPrefix = "// ---------------------------------------------------------\n// ";
     let output = "";
-    let cmdCount = 0;
     let _chain = "";
     let _x = 0;
     let _y = 0;
@@ -2091,31 +2115,36 @@ let MinecraftSphere = class extends s$1 {
     if (output !== "") {
       output = cmntPrefix + "Do some initial setup\n\n" + output + "\n\n";
     }
+    output = cmntPrefix + "Teleport to just near where all the command blocks will\n// be set, so you can see what's going on with the command\n// blocks\n\ntp" + coordStr({ x: firstBlock.x - 2, y: firstBlock.y - 2, z: firstBlock.z }) + " facing" + coordStr(firstBlock) + "\n\n\n" + output;
     output += cmntPrefix + "Generate the the command blocks that will do the building\n\n";
     let _firstCMD = "";
+    _x = firstBlock.x + 1;
+    const _first = _x;
     for (let a2 = 0; a2 < commands.length; a2 += 1) {
       const tmp = this._getCmdCmnt(commands[a2], prefix + "setblock" + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
-        x: firstBlock.x + (a2 + 1)
+        x: _x
       })) + ' minecraft:chain_command_block[facing=east]{Command:"[[CMD]]",auto:1}\n');
       output += tmp.output;
-      cmdCount += tmp.count;
       if (_firstCMD === "") {
         _firstCMD = tmp.output;
       }
+      _x += tmp.count;
     }
+    let _len = _first > _x ? _first - _x : _x - _first;
     output += "\n" + cmntPrefix + "Clone the blocks we just created\n";
+    _x = 0;
     for (let a2 = 1; a2 < totalRepeats; a2 *= 2) {
-      output += this.showExtraComments ? "\n\n// Iteration: " + a2 + "\n" : "\n";
+      output += this.showExtraComments ? "\n\n// Iteration: " + a2 + " (" + _len + " blocks)\n" : "\n";
       output += prefix + "clone" + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
-        x: firstBlock.x + 2
+        x: _first
       })) + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
-        x: firstBlock.x + 1 + cmdCount
+        x: firstBlock.x + _len
       })) + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
-        x: firstBlock.x + cmdCount + 2
+        x: firstBlock.x + _len + 1
       }));
-      cmdCount += cmdCount;
-      _x = firstBlock.x + cmdCount + 2;
-      if (cmdCount > 1024) {
+      _len += _len;
+      _x = firstBlock.x + _len;
+      if (_len > 1500) {
         break;
       }
     }
@@ -2123,58 +2152,77 @@ let MinecraftSphere = class extends s$1 {
     output += "\n\n\n" + cmntPrefix + "Start everthing going\n\n" + prefix + "setblock" + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
       y: firstBlock.y + 1
     })) + " minecraft:redstone_block\n";
-    output += "\n\n\n" + cmntPrefix.replace(/-/g, "=") + "Manually stop (remove redstone power for commands)\n\n" + prefix + "fill" + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
+    output += "\n\n\n" + cmntPrefix.replace(/-/g, "=") + "Manually stop (remove all command and redstone blocks)\n\n" + prefix + "fill" + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
       x: _x
     })) + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
       y: _y
     })) + " minecraft:air\n";
     return output;
   }
-  _generateSphere(centre, radius, thickness, blockTypeID) {
-    const rotation = this._getRotation(radius);
+  _generateSphere() {
+    const centre = this._getCentre();
+    const rotation = this._getRotation();
     const cmds = [];
-    const firstBlock = {
-      x: Math.ceil(centre.x + radius * 0.75),
-      y: Math.ceil(centre.y + radius * 0.75),
-      z: this.vMax - 3
-    };
+    const firstBlock = this._getFirstBlock();
     const oneoffs = {
       first: [
+        "// TP to the centre of the sphere, facing up, so you're in\n// the right spot and facing the right direction to start\n// generating the sphere.",
         "/execute at @p run tp @p" + coordStr(centre) + " facing" + coordStr(__spreadProps(__spreadValues({}, centre), { z: 320 })),
+        "// Set the redstone block that starts the sphere generation",
         "/setblock" + coordStr(__spreadProps(__spreadValues({}, firstBlock), { x: firstBlock.x + 1 })) + " minecraft:redstone_block"
       ],
       last: [],
-      end: "unless " + __spreadProps(__spreadValues({}, centre), { z: centre.z - radius })
+      end: "unless " + __spreadProps(__spreadValues({}, centre), { z: centre.z - this.radius })
     };
-    for (let a2 = 0, c2 = thickness; c2 > 0; c2 -= 1, a2 += 1) {
-      if (a2 > 0 && thickness > 1) {
-        cmds.push("// TP back to the previous location to make sure you haven't fallen below the appropriate point", "/execute at @p run tp @p" + coordStr(centre) + " ~ ~", "// Set another layer in the thickness of the sphere");
-      }
-      cmds.push("// rotate position to be able to set another block on the outside of the sphere", "/execute at @p run setblock ^ ^ ^" + (radius - a2) + " minecraft:" + blockTypeID);
+    if (this.hollowCentre === true) {
+      oneoffs.first = [
+        "// Make sure the centre of where you're building your object is only air",
+        "/fill" + coordStr({ x: centre.x - 1, y: centre.y - 1, z: centre.z - 1 }) + coordStr({ x: centre.x + 1, y: centre.y + 1, z: centre.z + 2 }) + "minecraft:air",
+        ...oneoffs.first
+      ];
     }
-    cmds.push("/execute at @p run tp @p" + coordStr(centre) + " ~" + rotation.horizontal + " ~" + rotation.vertical);
-    return "tp" + coordStr({ x: centre.x - 2, y: centre.y - 2, z: 320 }) + "\n\n" + this._generateSetBlocks(firstBlock, cmds, radius * radius, oneoffs);
+    for (let a2 = 0, c2 = this.thickness; c2 > 0; c2 -= 1, a2 += 1) {
+      let msg = "// Set the outer a block for the outer layer of the sphere";
+      if (a2 > 0 && this.thickness > 1) {
+        cmds.push("// TP back to the previous location to make sure you haven't fallen below the appropriate point", "/execute at @p run tp @p" + coordStr(centre) + " ~ ~");
+        msg = "// Set another layer in the thickness of the sphere";
+      }
+      cmds.push(msg, "/execute at @p run setblock ^ ^ ^" + (this.radius - a2) + " minecraft:" + this.blockTypeID);
+    }
+    if (this.fillWithAir === true) {
+      for (let a2 = this.radius - this.thickness; a2 > 0; a2 -= 1) {
+        cmds.push("// TP back to the previous location to make sure you haven't fallen below the appropriate point", "/execute at @p run tp @p" + coordStr(centre) + " ~ ~", "/execute at @p run setblock ^ ^ ^" + a2 + " minecraft:air");
+      }
+    }
+    cmds.push("// rotate position to be able to set another block on the outside of the sphere", "/execute at @p run tp @p" + coordStr(centre) + " ~" + rotation.horizontal + " ~" + rotation.vertical);
+    return this._generateSetBlocks(cmds, oneoffs);
   }
-  _generateCylinder(centre, radius, thickness, blockTypeID) {
-    const rotation = this._getRotation(radius);
+  _generateCylinder() {
+    const centre = this._getCentre();
+    const rotation = this._getRotation();
     const cmds = [];
+    const _one = this.length < 0 ? -1 : 1;
     const oneoffs = {
       first: [
-        "/execute at @p run tp @p" + coordStr(centre) + " facing" + coordStr(__spreadProps(__spreadValues({}, centre), { x: centre.x + radius }))
+        "// Make sure we have space to move so we can generate the cylinder",
+        "/fill" + coordStr({ x: centre.x - 1, y: centre.y - 1, z: centre.z - _one }) + coordStr({ x: centre.x + 1, y: centre.y + 1, z: centre.z + this.length + _one }) + " minecraft:air",
+        "// Set a block that limits the upwards movement of the user to the \n// height of the cylinder",
+        "/setblock" + coordStr(__spreadProps(__spreadValues({}, centre), { z: centre.z + this.length + _one })) + " minecraft:stone",
+        "/execute at @p run tp @p" + coordStr(centre) + " facing" + coordStr(__spreadProps(__spreadValues({}, centre), { x: centre.x + this.radius }))
       ],
       last: [],
       end: ""
     };
-    for (let a2 = 0, c2 = thickness; a2 >= 0; a2 -= 1) {
-      cmds.push("/execute at @p run setblock ^ ^ ^" + c2 + " minecraft:" + blockTypeID, "/execute at @p run tp @p" + coordStr(centre) + " ~ ~");
+    for (let a2 = 0, c2 = this.thickness; c2 > 0; c2 -= 1, a2 += 1) {
+      cmds.push("// Set another layer in the thickness of the sphere", "/execute at @p run setblock ^ ^ ^" + (this.radius - a2) + " minecraft:" + this.blockTypeID);
     }
-    cmds.push("/execute at @p run tp @p" + coordStr(__spreadProps(__spreadValues({}, centre), { z: "~1" })) + " ~ ~" + rotation.horizontal + " ~");
-    const firstBlock = {
-      x: centre.x + radius / 2,
-      y: centre.y + radius / 2,
-      z: this.vMax - 3
-    };
-    return this._generateSetBlocks(firstBlock, cmds, 36, oneoffs);
+    if (this.fillWithAir === true) {
+      for (let a2 = this.radius - this.thickness; a2 > 0; a2 -= 1) {
+        cmds.push("// TP back to the previous location to make sure you haven't fallen below the appropriate point", "/execute at @p run setblock ^ ^ ^" + a2 + " minecraft:air");
+      }
+    }
+    cmds.push("// rotate so we can start setting more blocks on the outside of\n// the cylinder", "/execute at @p run tp @p" + coordStr(__spreadProps(__spreadValues({}, centre), { z: "~1" })) + " ~ ~" + rotation.horizontal + " ~");
+    return this._generateSetBlocks(cmds, oneoffs);
   }
   _filterBlockListInner(value) {
     let output = value;
@@ -2229,11 +2277,21 @@ let MinecraftSphere = class extends s$1 {
         this.thickness = makePos(val);
         changed = true;
         break;
+      case "length":
+        this.length = makePos(val);
+        changed = true;
+        break;
       case "ignore-warnings":
         this.ignoreWarnings = input.checked;
         break;
       case "show-comments":
         this.showExtraComments = input.checked;
+        break;
+      case "fill-with-air":
+        this.fillWithAir = input.checked;
+        break;
+      case "hollow-centre":
+        this.hollowCentre = input.checked;
         break;
       case "object-type-sphere":
       case "object-type-cylinder":
@@ -2250,7 +2308,6 @@ let MinecraftSphere = class extends s$1 {
     if (changed === true) {
       this._setWarnings();
     }
-    console.log("this:", this);
   }
   renderWarnings(msgs) {
     const l2 = msgs.length;
@@ -2285,7 +2342,8 @@ let MinecraftSphere = class extends s$1 {
               class="radio-grp__label">${label}</label>
       </li>`;
   }
-  renderCbBtn(id, label, checked) {
+  renderCbBtn(id, label, checked, title = "") {
+    const _title = title !== "" ? title : void 0;
     return $`
       <li>
         <input type="checkbox"
@@ -2294,12 +2352,14 @@ let MinecraftSphere = class extends s$1 {
                class="cb-btn__input"
               ?checked=${checked}
               @change=${this.changeHandler} />
-        <label for="${id}" class="cb-btn__label cb-btn__label--badge">
+        <label for="${id}"
+               class="cb-btn__label cb-btn__label--badge"
+               title="${l(_title)}">
           ${label}
         </label>
       </li>`;
   }
-  renderNumInput(id, label, value, min, max, warnings) {
+  renderNumInput(id, label, value, min, max, warnings, description = "") {
     return $`
       ${this.renderWarnings(warnings)}
       <p class="input">
@@ -2312,6 +2372,7 @@ let MinecraftSphere = class extends s$1 {
                max="${max}"
                step="1"
               @change=${this.changeHandler} />
+        ${description !== "" ? $`<span class="input__desc">${description}</span>` : ""}
       </p>
     `;
   }
@@ -2354,7 +2415,7 @@ let MinecraftSphere = class extends s$1 {
 
       ${this.renderNumInput("radius", obj + " radius", this.radius, this._rMin, this.vMax, this._warningMsgs.radius)}
       ${this.renderNumInput("thickness", obj + " thickness", this.thickness, 1, tmp > 1 ? tmp : 1, [this._warningMsgs.thickness])}
-      ${this._doSphere === false ? this.renderNumInput("height", "Cylinder height", this.height, 1, tmp > 1 ? tmp : 1, [this._warningMsgs.height]) : this.renderNumInput("stop-angle", "Stop angle for sphere (180 = full sphere)", this.stopAngle, 1, 180, [this._warningMsgs.stopAngle])}
+      ${this._doSphere === false ? this.renderNumInput("length", "Cylinder length", this.length, 1, tmp > 1 ? tmp : 1, [this._warningMsgs.length]) : this.renderNumInput("stop-angle", "Stop angle for sphere (180 = full sphere)", this.stopAngle, 1, 180, [this._warningMsgs.stopAngle], 'The angle (from "straight up") when the sphere stops being generated. Used for creating domes and parts of a sphere')}
 
       <h2>${obj} center coordinates</h2>
       ${this.renderNumInput("centreX", "East / West", this.centreX, this.hMax * -1, this.hMax, [this._warningMsgs.x])}
@@ -2363,18 +2424,16 @@ let MinecraftSphere = class extends s$1 {
 
       <ul class="list-clean checkable-grp__items checkbox-grp__items">
         ${this._warningCount > 0 ? this.renderCbBtn("ignore-warnings", "Ignore warnings", this.ignoreWarnings) : ""}
+        ${this.renderCbBtn("fill-with-air", "Fill " + this.objecType + " with air", this.fillWithAir, "If your " + this.objecType + " partially or completely occupies a space that is already occupied by other block types, this insures it is hollow.\n(NOTE: This could significantly increase the build time.)")}
+        ${this.renderCbBtn("hollow-centre", "Make sure centre of " + this.objecType + " is filled with air", this.hollowCentre, "Make sure the centre of your " + this.objecType + " is empty, this insures that you have a place to stand when creating the " + this.objecType + ".\n(NOTE: Only use this if you know the centre of your " + this.objecType + " is inside existing non-air/non-water blocks.)")}
         ${this.renderCbBtn("show-comments", "Show extra comments", this.showExtraComments)}
       </ul>
+      ${this.renderNumInput("cmdBlockHeight", "Command block vertical height", this.cmdBlockHeight, this.vMax * -1, this.vMax, [this._warningMsgs.cmdBlockHeight], "The altitude command blocks are placed so they don't interfear with other blocks when they are set and removed")}
       ${btn}`;
   }
   renderCode() {
-    const _centre = {
-      x: this.centreX,
-      y: this.centreY,
-      z: this.centreZ
-    };
     return $`
-      <textarea>${this._doSphere ? this._generateSphere(_centre, this.radius, this.thickness, this.blockTypeID) : this._generateCylinder(_centre, this.radius, this.thickness, this.blockTypeID)}</textarea>
+      <textarea>${this._doSphere ? this._generateSphere() : this._generateCylinder()}</textarea>
       <button id="modify"
               value="1"
              @click=${this.changeHandler}>
@@ -2383,7 +2442,6 @@ let MinecraftSphere = class extends s$1 {
   }
   render() {
     this._init();
-    console.log("this.warningCount:", this._warningCount);
     return $`
       <h1>Minecraft sphere (& cylinder) code generator</h1>
 
@@ -2406,6 +2464,9 @@ MinecraftSphere.styles = r$2`
       --txt-colour: #fff;
       --bg-colour: #2d2b2b;
       --h-font: Arial, Helvetica, sans-serif;
+
+      --outline: 0.25rem dotted var(--txt-colour);
+      --outline-offset: 0.2rem;
     }
 
     h1, h2, h3, h4, h5, h6 {
@@ -2422,7 +2483,7 @@ MinecraftSphere.styles = r$2`
       box-sizing: border-box;
       justify-content: space-between;
       margin: 0.5em 0;
-      overflow: hidden;
+      /* overflow: hidden; */
       padding: 0.1rem 0.3rem;
       position: relative;
     }
@@ -2450,7 +2511,15 @@ MinecraftSphere.styles = r$2`
       position: relative;
       text-align: center;
       transition: color var(--ease) var(--timing) background-color var(--ease) var(--timing);
-      width: calc(100% - 1rem);
+      width: calc(100% - 2.2rem);
+    }
+    .radio-grp__label:hover {
+      cursor: pointer
+    }
+    .radio-grp__input:focus + .radio-grp__label,
+    .radio-grp__label:focus {
+      outline: var(--outline);
+      outline-offset: var(--outline-offset);
     }
     .radio-grp__label::after {
       background-color: var(--bg-colour);
@@ -2511,6 +2580,7 @@ MinecraftSphere.styles = r$2`
       padding: 0.2rem 1.75rem;
       position: relative;
       text-align: center;
+      margin: 1rem 0;
     }
     .cb-btn__label--centre {
       margin: 0.1rem auto;
@@ -2563,7 +2633,8 @@ MinecraftSphere.styles = r$2`
       content: "\\02713";
     }
     .cb-btn__input:focus + .cb-btn__label {
-      outline: 0.15rem dotted var(--txt-colour);
+      outline: var(--outline);
+      outline-offset: var(--outline-offset);
     }
     .list-clean {
       margin: 0;
@@ -2590,10 +2661,13 @@ MinecraftSphere.styles = r$2`
     }
 
     p.input {
-      align-items: flex-start;
+      // align-items: flex-start;
       box-sizing: border-box;
       border-top: var(--line-weight) solid var(--txt-colour);
-      display: flex;
+      display: grid;
+      grid-template-areas: 'label' 'input' 'description';
+      row-gap: 0.5rem;
+      column-gap: 0.5rem;
       margin-top: 0.5rem;
       padding: 1rem 0 0;
     }
@@ -2601,12 +2675,17 @@ MinecraftSphere.styles = r$2`
       display: inline-block;
       padding-right: 1rem;
       text-align: right;
-      width: 9rem;
+      width: 100%;
+      grid-area: label;
     }
     p.input > input {
       display: inline-block;
       // flex-grow: 1;
       width: 5rem;
+      grid-area: input;
+    }
+    .input__desc {
+      grid-area: description;
     }
     button {
       display: inline-block;
@@ -2622,6 +2701,12 @@ MinecraftSphere.styles = r$2`
     option:selected {
       font-weight: bold;
     }
+    @media screen and (min-width: 48rem) {
+      p.input {
+        grid-template-areas: 'label input' 'label description';
+        grid-template-columns: 10rem 1fr;
+      }
+    }
   `;
 __decorateClass([
   e$2({ reflect: true, type: Number })
@@ -2631,7 +2716,7 @@ __decorateClass([
 ], MinecraftSphere.prototype, "thickness", 2);
 __decorateClass([
   e$2({ reflect: true, type: Number })
-], MinecraftSphere.prototype, "height", 2);
+], MinecraftSphere.prototype, "length", 2);
 __decorateClass([
   e$2({ reflect: true, type: String })
 ], MinecraftSphere.prototype, "blockTypeLabel", 2);
@@ -2666,11 +2751,20 @@ __decorateClass([
   e$2({ type: Boolean })
 ], MinecraftSphere.prototype, "showExtraComments", 2);
 __decorateClass([
+  e$2({ type: Boolean })
+], MinecraftSphere.prototype, "fillWithAir", 2);
+__decorateClass([
+  e$2({ type: Boolean })
+], MinecraftSphere.prototype, "hollowCentre", 2);
+__decorateClass([
   e$2({ reflect: true, type: String })
 ], MinecraftSphere.prototype, "objecType", 2);
 __decorateClass([
   e$2({ reflect: true, type: Number })
 ], MinecraftSphere.prototype, "stopAngle", 2);
+__decorateClass([
+  e$2({ reflect: true, type: Number })
+], MinecraftSphere.prototype, "cmdBlockHeight", 2);
 __decorateClass([
   t$1()
 ], MinecraftSphere.prototype, "_warningMsgs", 2);

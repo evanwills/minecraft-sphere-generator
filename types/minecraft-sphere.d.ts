@@ -15,9 +15,9 @@ export declare class MinecraftSphere extends LitElement {
      */
     thickness: number;
     /**
-     * The height of a cylinder
+     * The length/height of a cylinder
      */
-    height: number;
+    length: number;
     /**
      * The human readable label for the block type to be used to build
      * the sphere
@@ -71,6 +71,15 @@ export declare class MinecraftSphere extends LitElement {
      */
     showExtraComments: boolean;
     /**
+     * Whether or not to fill the object with air as it's being built
+     */
+    fillWithAir: boolean;
+    /**
+     * Whether or not to fill the centre of the object with air before
+     * starting to generate the object
+     */
+    hollowCentre: boolean;
+    /**
      * The type of object to be created.
      */
     objecType: string;
@@ -79,6 +88,11 @@ export declare class MinecraftSphere extends LitElement {
      * complete
      */
     stopAngle: number;
+    /**
+     * The vertical position where command blocks are placed so they
+     * don't interfear with other things
+     */
+    cmdBlockHeight: number;
     private _warningMsgs;
     radiusError: string;
     thicknessError: string;
@@ -125,7 +139,6 @@ export declare class MinecraftSphere extends LitElement {
     /**
      * Get the horizontal & vertical rotion angles
      *
-     * @param {number}  radius The radius of the sphere/cylinder
      * @param {boolean} floor  Whether or not to use floor or ceil to
      *                         round the output values
      *
@@ -133,21 +146,92 @@ export declare class MinecraftSphere extends LitElement {
      *                      after setting every (inner) block
      */
     private _getRotation;
+    /**
+     * Get the x, y & z coordinates for the first command block
+     *
+     * @returns Coordinates for the first command block
+     */
+    private _getFirstBlock;
+    /**
+     * Get the x, y & z coordinates for the centre of the sphere or
+     * centre of the start of the cylinder
+     *
+     * @returns
+     */
+    private _getCentre;
+    /**
+     * Generate all the commands (and comments) needed to do all the
+     * work to generate object
+     *
+     * __NOTE:__ This method does not generate the commands that the
+     *           command blocks execute. It only wraps the commands in
+     *           setblock commands.
+     *           It does add a (optional) TP command to teleport you to
+     *           where the command blocks are set so you can see what's
+     *           going on. Plus a fill command to clear all the command
+     *           blocks & redstone power blocks to end the generation
+     *           process.
+     *
+     * @param firstBlock   Coordinates for the position of first command
+     *                     block
+     * @param commands     List of commands that need to be generated
+     * @param totalRepeats The total number of times the commands have
+     *                     to be run in each repeat cycle.
+     *                     (Used for working out how many times the
+     *                      commands need to be cloned)
+     * @param oneoffs      List of commands that are only executed once
+     *
+     * @returns Plain text of all the commands (in order of execution)
+     *          plus any comments to help identify what each command is
+     *          for.
+     */
     private _generateSetBlocks;
     /**
-     * Generate the commands used for generating a sphere
+     * Generate the list of commands used for generating a sphere
      *
-     * @param {ICoodinates} centre      Coordinates for the centre of
-     *                                  the sphere
-     * @param {number}      radius      Radius of the sphere
-     * @param {number}      thickness   Thickness of the wall of the
-     *                                  sphere
-     * @param {string}      blockTypeID ID of block type to build the
-     *                                  sphere
+     * @param {ICoodinates} centre       Coordinates for the centre of
+     *                                   the sphere
+     * @param {number}      radius       Radius of the sphere
+     * @param {number}      thickness    Thickness of the wall of the
+     *                                   sphere
+     * @param {string}      blockTypeID  ID of block type to build the
+     *                                   sphere
+     * @param {boolean}     fillWithAir  Fill the inside of the sphere
+     *                                   with air
+     * @param {boolean}     hollowCentre Make sure the centre of the
+     *                                   sphere is hollow
+     * @param {number}      stopAngle    The angle (from straight up)
+     *                                   at which stop generating the
+     *                                   sphere
      *
      * @returns {string} List of commands to run in Minecraft
      */
     private _generateSphere;
+    /**
+     * Generate the list of commands used for generating a cylinder
+     *
+     * @param {ICoodinates} centre       Coordinates for the centre of
+     *                                   the sphere
+     * @param {number}      radius       Radius of the sphere
+     * @param {number}      thickness    Thickness of the wall of the
+     *                                   sphere
+     * @param {string}      blockTypeID  ID of block type to build the
+     *                                   sphere
+     * @param {boolean}     fillWithAir  Fill the inside of the sphere
+     *                                   with air
+     * @param {boolean}     hollowCentre Make sure the centre of the
+     *                                   sphere is hollow
+     * @param {number}      length       The angle (from straight up)
+     *                                   at which stop generating the
+     *                                   sphere
+     * @param {number}      zAngle       The angle from straight up for
+     *                                   building direction of the
+     *                                   cylinder
+     * @param {number}      xyAngle      Horizontal angle for building
+     *                                   the direction the cylinder
+     *
+     * @returns {string} List of commands to run in Minecraft
+     */
     private _generateCylinder;
     /**
      * Filter the list of available Minecraft block types using the
@@ -193,19 +277,22 @@ export declare class MinecraftSphere extends LitElement {
      *
      * @returns {TemplateResult}
      */
-    renderCbBtn(id: string, label: string, checked: boolean): TemplateResult;
+    renderCbBtn(id: string, label: string, checked: boolean, title?: string): TemplateResult;
     /**
      * Get a numeric input filed & label
      *
-     * @param {string} id    ID of the input field
-     * @param {label}  label Label for the input field
-     * @param {number} value Value for the input field
-     * @param {number} min   Minimum allowed value for the field
-     * @param {number} max   Maximum allowed value for the field
+     * @param {string} id          ID of the input field
+     * @param {label}  label       Label for the input field
+     * @param {number} value       Value for the input field
+     * @param {number} min         Minimum allowed value for the field
+     * @param {number} max         Maximum allowed value for the field
+     * @param {number} warnings    Warning message for this field
+     * @param {string} description Helpful info about the purpose of
+     *                             the field
      *
      * @returns {TemplateResult}
      */
-    renderNumInput(id: string, label: string, value: number, min: number, max: number, warnings: Array<string>): TemplateResult;
+    renderNumInput(id: string, label: string, value: number, min: number, max: number, warnings: Array<string>, description?: string): TemplateResult;
     /**
      * Render the HTML for all the user input fields needed to get the
      * data to generate the code blocks
