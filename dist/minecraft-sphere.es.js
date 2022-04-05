@@ -2240,7 +2240,8 @@ let MinecraftSphere = class extends s$1 {
         cmds.push("// TP back to the previous location to make sure you haven't fallen below the appropriate point", "/execute at @p run setblock ^ ^ ^" + a2 + " minecraft:air");
       }
     }
-    cmds.push("// rotate so we can start setting more blocks on the outside of\n// the cylinder", "/execute at @p run tp @p" + coordStr(__spreadProps(__spreadValues({}, centre), { z: "~1" })) + " ~ ~" + rotation.horizontal + " ~");
+    const _up = 1 / (2 * Math.PI * this.radius);
+    cmds.push("// rotate so we can start setting more blocks on the outside of\n// the cylinder", "/execute at @p run tp @p" + coordStr(__spreadProps(__spreadValues({}, centre), { z: "~" + _up })) + " ~" + rotation.horizontal + " ~");
     return this._generateSetBlocks(cmds, oneoffs);
   }
   _filterBlockListInner(value) {

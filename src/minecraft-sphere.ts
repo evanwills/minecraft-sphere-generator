@@ -1668,11 +1668,12 @@ export class MinecraftSphere extends LitElement {
         );
       }
     }
+    const _up = 1 / (2 * Math.PI * this.radius)
 
     cmds.push(
       '// rotate so we can start setting more blocks on the outside of\n' +
       '// the cylinder',
-      '/execute at @p run tp @p' + coordStr({...centre, z: '~1'}) + ' ~ ~' +
+      '/execute at @p run tp @p' + coordStr({...centre, z: '~' + _up}) + ' ~' +
       rotation.horizontal + ' ~'
     );
 
