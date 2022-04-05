@@ -2170,7 +2170,7 @@ let MinecraftSphere = class extends s$1 {
         "// TP to the centre of the sphere, facing up, so you're in\n// the right spot and facing the right direction to start\n// generating the sphere.",
         "/execute at @p run tp @p" + coordStr(centre) + " facing" + coordStr(__spreadProps(__spreadValues({}, centre), { z: 320 })),
         "// Set the redstone block that starts the sphere generation",
-        "/setblock" + coordStr(__spreadProps(__spreadValues({}, firstBlock), { x: firstBlock.x + 1 })) + " minecraft:redstone_block"
+        "/setblock" + coordStr(__spreadProps(__spreadValues({}, firstBlock), { x: firstBlock.x })) + " minecraft:redstone_block"
       ],
       last: [],
       end: "unless " + __spreadProps(__spreadValues({}, centre), { z: centre.z - this.radius })

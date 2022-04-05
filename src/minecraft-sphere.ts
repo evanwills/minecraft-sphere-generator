@@ -1519,7 +1519,7 @@ export class MinecraftSphere extends LitElement {
         '/execute at @p run tp @p' + coordStr(centre) +
         ' facing' + coordStr({...centre, z: 320}),
         '// Set the redstone block that starts the sphere generation',
-        '/setblock' + coordStr({...firstBlock, x: firstBlock.x + 1}) + ' ' +
+        '/setblock' + coordStr({...firstBlock, x: firstBlock.x}) + ' ' +
         'minecraft:redstone_block'
       ],
       last: [],
