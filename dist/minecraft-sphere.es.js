@@ -2115,10 +2115,12 @@ let MinecraftSphere = class extends s$1 {
         y: _y
       })) + " minecraft:" + _chain + 'command_block[facing=south]{Command:"[[CMD]]"' + _auto + "}\n", _chain);
       console.log("_y:", _y);
-      _chain = tmp.chain;
       output += tmp.output;
-      _auto = ",auto:1";
-      _y += tmp.count;
+      if (tmp.count === 1) {
+        _chain = tmp.chain;
+        _auto = ",auto:1";
+        _y += tmp.count;
+      }
     }
     if (output !== "") {
       output = cmntPrefix + "Do some initial setup\n\n" + output + "\n\n";

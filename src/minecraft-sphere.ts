@@ -1387,10 +1387,12 @@ export class MinecraftSphere extends LitElement {
       );
       console.log('_y:', _y);
 
-      _chain = tmp.chain;
       output += tmp.output;
-      _auto = ',auto:1';
-      _y += tmp.count;
+      if (tmp.count === 1) {
+        _chain = tmp.chain;
+        _auto = ',auto:1';
+        _y += tmp.count;
+      }
     }
 
     if (output !== '') {
