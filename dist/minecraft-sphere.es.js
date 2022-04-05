@@ -2101,21 +2101,22 @@ let MinecraftSphere = class extends s$1 {
     let output = "";
     let _chain = "";
     let _x = 0;
-    let _y = 0;
+    let _y = firstBlock.y + 1;
     let _auto = "";
     for (let a2 = 0, c2 = oneoffs.first.length; a2 < c2; a2 += 1) {
-      _y = firstBlock.y + 1 + (a2 + 1);
       const tmp = this._getCmdCmnt(oneoffs.first[a2], prefix + "setblock" + coordStr(__spreadProps(__spreadValues({}, firstBlock), {
         y: _y
       })) + " minecraft:" + _chain + 'command_block[facing=south]{Command:"[[CMD]]"' + _auto + "}\n", _chain);
+      console.log("_y:", _y);
       _chain = tmp.chain;
       output += tmp.output;
       _auto = ",auto:1";
+      _y += tmp.count;
     }
     if (output !== "") {
       output = cmntPrefix + "Do some initial setup\n\n" + output + "\n\n";
     }
-    output = cmntPrefix + "Teleport to just near where all the command blocks will\n// be set, so you can see what's going on with the command\n// blocks\n\ntp" + coordStr({ x: firstBlock.x - 2, y: firstBlock.y - 2, z: firstBlock.z }) + " facing" + coordStr(firstBlock) + "\n\n\n" + output;
+    output = cmntPrefix + "Teleport to just near where all the command blocks will\n// be set, so you can see what's going on with the command\n// blocks\n\ntp @p" + coordStr({ x: firstBlock.x - 2, y: firstBlock.y - 2, z: firstBlock.z }) + " facing" + coordStr(firstBlock) + "\n\n\n" + output;
     output += cmntPrefix + "Generate the the command blocks that will do the building\n\n";
     let _firstCMD = "";
     _x = firstBlock.x + 1;

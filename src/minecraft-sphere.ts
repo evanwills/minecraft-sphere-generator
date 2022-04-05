@@ -1354,13 +1354,12 @@ export class MinecraftSphere extends LitElement {
     // let cmdCount = 0;
     let _chain = '';
     let _x = 0;
-    let _y = 0;
+    let _y = firstBlock.y + 1;
     let _auto = '';
 
     // set one-off commands
     // (used for moving to the correct spot to start building the sphere)
     for (let a = 0, c = oneoffs.first.length; a < c; a += 1) {
-      _y = (firstBlock.y + 1 + (a + 1))
       const tmp = this._getCmdCmnt(
         oneoffs.first[a],
         prefix + 'setblock' +
@@ -1372,10 +1371,12 @@ export class MinecraftSphere extends LitElement {
         '[facing=south]' + '{Command:"[[CMD]]"' + _auto + '}\n',
         _chain
       );
+      console.log('_y:', _y);
 
       _chain = tmp.chain;
       output += tmp.output;
       _auto = ',auto:1';
+      _y += tmp.count;
     }
 
     if (output !== '') {
@@ -1387,7 +1388,7 @@ export class MinecraftSphere extends LitElement {
              'Teleport to just near where all the command blocks will\n' +
              '// be set, so you can see what\'s going on with the command\n' +
              '// blocks\n\n' +
-             'tp' + coordStr({x: (firstBlock.x - 2), y: (firstBlock.y - 2), z: firstBlock.z}) +
+             'tp @p' + coordStr({x: (firstBlock.x - 2), y: (firstBlock.y - 2), z: firstBlock.z}) +
              ' facing' + coordStr(firstBlock) + '\n\n\n' + output
 
     output += cmntPrefix + 'Generate the the command blocks that ' +
