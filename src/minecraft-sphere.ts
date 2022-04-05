@@ -1448,7 +1448,7 @@ export class MinecraftSphere extends LitElement {
       _len += _len
       _x = (firstBlock.x + _len)
 
-      if (_len > 1500) {
+      if (_len > 1024) {
         // We don't want too many blocks in a line.
         // better stop cloning here.
         break;
@@ -1530,7 +1530,7 @@ export class MinecraftSphere extends LitElement {
       oneoffs.first = [
         '// Make sure the centre of where you\'re building your ' +
            'object is only air',
-        '/fill' + coordStr({x: centre.x - 1, y: centre.y - 1, z: centre.z - 1}) + coordStr({x: centre.x + 1, y: centre.y + 1, z: centre.z + 2}) + 'minecraft:air',
+        '/fill' + coordStr({x: centre.x - 1, y: centre.y - 1, z: centre.z - 1}) + coordStr({x: centre.x + 1, y: centre.y + 1, z: centre.z + 2}) + ' minecraft:air',
         ...oneoffs.first
       ]
     }
