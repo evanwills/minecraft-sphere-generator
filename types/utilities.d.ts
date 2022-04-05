@@ -27,3 +27,27 @@ export declare const normalise: (input: string) => string;
  *                  (Note: string includes a leading space)
  */
 export declare const coordStr: (coordinates: ICoodinatesBase) => string;
+/**
+ * Round up number to 3 decimal places
+ *
+ * @param input Number to be rounded up
+ *
+ * @returns rounded up number
+ */
+export declare const ceil3: (input: number) => number;
+/**
+ * Round number to 3 decimal places
+ *
+ * @param input Number to be rounded
+ *
+ * @returns rounded number
+ */
+export declare const r3: (input: number) => number;
+/**
+ * Round number to an integer
+ *
+ * @param input Number to be rounded
+ *
+ * @returns rounded number
+ */
+export declare const r: (input: number) => number;
