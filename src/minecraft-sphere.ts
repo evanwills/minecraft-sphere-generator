@@ -690,12 +690,13 @@ export class MinecraftSphere extends LitElement {
    * What sort of output do we want from the generator
    *
    * Options are:
-   * * 1 = Either sphere or cylinder
-   * * 2 = Sphere only
-   * * 3 = Cylinder only
+   * * 1 = Sphere only
+   * * 2 = Either sphere or cylinder (sphere default)
+   * * 3 = Either sphere or cylinder (cylinder default)
+   * * 4 = Cylinder only
    */
   @property({ type: Number })
-  outputMode : number = 1;
+  outputMode : number = 2;
 
   /**
    * Whether or not to render command block generator commands
@@ -727,7 +728,7 @@ export class MinecraftSphere extends LitElement {
    * The type of object to be created.
    */
   @property({ reflect: true, type: String })
-  objecType : string = 'sphere';
+  objectType : string = 'sphere';
 
   /**
    * The angle (from vertical *0*) at which the sphere is considered
@@ -1055,7 +1056,7 @@ export class MinecraftSphere extends LitElement {
    * acceptable limits
    */
   private _setWarnings() : void {
-    const obj = this.objecType
+    const obj = this.objectType
     const x = makePos(this.centreX)
     const y = makePos(this.centreY)
     const z = makePos(this.centreZ)
@@ -1201,7 +1202,7 @@ export class MinecraftSphere extends LitElement {
       // console.log('doing INIT');
       // console.log('this.blockTypeLabel:', this.blockTypeLabel);
       this._doInit = false;
-      this._doSphere = (this.outputMode !== 3);
+      this._doSphere = (this.outputMode < 3);
       this._setWarnings();
       if (this.blockTypeLabel !== '') {
         this._filterBlockListInner(this.blockTypeLabel);
@@ -1668,7 +1669,7 @@ export class MinecraftSphere extends LitElement {
         );
       }
     }
-    const _up = 1 / (2 * Math.PI * this.radius)
+    const _up = Math.round(1 / (2 * Math.PI * this.radius) * 10000) / 10000
 
     cmds.push(
       '// rotate so we can start setting more blocks on the outside of\n' +
@@ -1823,7 +1824,7 @@ export class MinecraftSphere extends LitElement {
       case 'object-type-sphere':
       case 'object-type-cylinder':
         this._doSphere = val === 1;
-        this.objecType = (this._doSphere)
+        this.objectType = (this._doSphere)
           ? 'sphere'
           : 'cylinder';
         break;
@@ -1980,11 +1981,11 @@ export class MinecraftSphere extends LitElement {
       : '';
     const tmp = (this.radius - this._rMin - 1);
 
-    const obj : string = ucFirst(this.objecType);
+    const obj : string = ucFirst(this.objectType);
     return html`
 
       ${this.renderWarnings(this._warningMsgs.general)}
-      ${(this.outputMode === 1)
+      ${(this.outputMode === 2 || this.outputMode === 3)
         ? html`
           <div class="checkable-grp__wrap radio-grp__wrapper">
               <h3 id="object-type-label" class="checkable-grp__h radio-grp__h">Object type:</h2>
@@ -2067,15 +2068,15 @@ export class MinecraftSphere extends LitElement {
         }
         ${this.renderCbBtn(
           'fill-with-air',
-          'Fill ' + this.objecType + ' with air',
+          'Fill ' + this.objectType + ' with air',
           this.fillWithAir,
-          'If your ' + this.objecType + ' partially or completely occupies a space that is already occupied by other block types, this insures it is hollow.\n(NOTE: This could significantly increase the build time.)'
+          'If your ' + this.objectType + ' partially or completely occupies a space that is already occupied by other block types, this insures it is hollow.\n(NOTE: This could significantly increase the build time.)'
         )}
         ${this.renderCbBtn(
           'hollow-centre',
-          'Make sure centre of ' + this.objecType + ' is filled with air',
+          'Make sure centre of ' + this.objectType + ' is filled with air',
           this.hollowCentre,
-          'Make sure the centre of your ' + this.objecType + ' is empty, this insures that you have a place to stand when creating the ' + this.objecType + '.\n(NOTE: Only use this if you know the centre of your ' + this.objecType + ' is inside existing non-air/non-water blocks.)'
+          'Make sure the centre of your ' + this.objectType + ' is empty, this insures that you have a place to stand when creating the ' + this.objectType + '.\n(NOTE: Only use this if you know the centre of your ' + this.objectType + ' is inside existing non-air/non-water blocks.)'
         )}
         ${this.renderCbBtn(
           'show-comments',
