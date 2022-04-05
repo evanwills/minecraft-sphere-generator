@@ -56,9 +56,10 @@ export declare class MinecraftSphere extends LitElement {
      * What sort of output do we want from the generator
      *
      * Options are:
-     * * 1 = Either sphere or cylinder
-     * * 2 = Sphere only
-     * * 3 = Cylinder only
+     * * 1 = Sphere only
+     * * 2 = Either sphere or cylinder (sphere default)
+     * * 3 = Either sphere or cylinder (cylinder default)
+     * * 4 = Cylinder only
      */
     outputMode: number;
     /**
@@ -82,7 +83,7 @@ export declare class MinecraftSphere extends LitElement {
     /**
      * The type of object to be created.
      */
-    objecType: string;
+    objectType: string;
     /**
      * The angle (from vertical *0*) at which the sphere is considered
      * complete

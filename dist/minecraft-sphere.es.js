@@ -1915,12 +1915,12 @@ let MinecraftSphere = class extends s$1 {
     this.vMax = 320;
     this.hMax = 9999;
     this.slowThreshold = 75;
-    this.outputMode = 1;
+    this.outputMode = 2;
     this.ignoreWarnings = false;
     this.showExtraComments = false;
     this.fillWithAir = false;
     this.hollowCentre = false;
-    this.objecType = "sphere";
+    this.objectType = "sphere";
     this.stopAngle = 180;
     this.cmdBlockHeight = 317;
     this._warningMsgs = {
@@ -1945,7 +1945,7 @@ let MinecraftSphere = class extends s$1 {
     this._rMin = 3;
   }
   _setWarnings() {
-    const obj = this.objecType;
+    const obj = this.objectType;
     const x2 = makePos(this.centreX);
     const y = makePos(this.centreY);
     const z2 = makePos(this.centreZ);
@@ -2033,7 +2033,7 @@ let MinecraftSphere = class extends s$1 {
   _init() {
     if (this._doInit) {
       this._doInit = false;
-      this._doSphere = this.outputMode !== 3;
+      this._doSphere = this.outputMode < 3;
       this._setWarnings();
       if (this.blockTypeLabel !== "") {
         this._filterBlockListInner(this.blockTypeLabel);
@@ -2240,7 +2240,7 @@ let MinecraftSphere = class extends s$1 {
         cmds.push("// TP back to the previous location to make sure you haven't fallen below the appropriate point", "/execute at @p run setblock ^ ^ ^" + a2 + " minecraft:air");
       }
     }
-    const _up = 1 / (2 * Math.PI * this.radius);
+    const _up = Math.round(1 / (2 * Math.PI * this.radius) * 1e4) / 1e4;
     cmds.push("// rotate so we can start setting more blocks on the outside of\n// the cylinder", "/execute at @p run tp @p" + coordStr(__spreadProps(__spreadValues({}, centre), { z: "~" + _up })) + " ~" + rotation.horizontal + " ~");
     return this._generateSetBlocks(cmds, oneoffs);
   }
@@ -2316,7 +2316,7 @@ let MinecraftSphere = class extends s$1 {
       case "object-type-sphere":
       case "object-type-cylinder":
         this._doSphere = val === 1;
-        this.objecType = this._doSphere ? "sphere" : "cylinder";
+        this.objectType = this._doSphere ? "sphere" : "cylinder";
         break;
       case "generate":
         this._showCode = this._canGenerate();
@@ -2404,11 +2404,11 @@ let MinecraftSphere = class extends s$1 {
             Generate
           </button>` : "";
     const tmp = this.radius - this._rMin - 1;
-    const obj = ucFirst(this.objecType);
+    const obj = ucFirst(this.objectType);
     return $`
 
       ${this.renderWarnings(this._warningMsgs.general)}
-      ${this.outputMode === 1 ? $`
+      ${this.outputMode === 2 || this.outputMode === 3 ? $`
           <div class="checkable-grp__wrap radio-grp__wrapper">
               <h3 id="object-type-label" class="checkable-grp__h radio-grp__h">Object type:</h2>
               <ul class="list-clean list-clean--tight list-inline radio-grp__items">
@@ -2444,8 +2444,8 @@ let MinecraftSphere = class extends s$1 {
 
       <ul class="list-clean checkable-grp__items checkbox-grp__items">
         ${this._warningCount > 0 ? this.renderCbBtn("ignore-warnings", "Ignore warnings", this.ignoreWarnings) : ""}
-        ${this.renderCbBtn("fill-with-air", "Fill " + this.objecType + " with air", this.fillWithAir, "If your " + this.objecType + " partially or completely occupies a space that is already occupied by other block types, this insures it is hollow.\n(NOTE: This could significantly increase the build time.)")}
-        ${this.renderCbBtn("hollow-centre", "Make sure centre of " + this.objecType + " is filled with air", this.hollowCentre, "Make sure the centre of your " + this.objecType + " is empty, this insures that you have a place to stand when creating the " + this.objecType + ".\n(NOTE: Only use this if you know the centre of your " + this.objecType + " is inside existing non-air/non-water blocks.)")}
+        ${this.renderCbBtn("fill-with-air", "Fill " + this.objectType + " with air", this.fillWithAir, "If your " + this.objectType + " partially or completely occupies a space that is already occupied by other block types, this insures it is hollow.\n(NOTE: This could significantly increase the build time.)")}
+        ${this.renderCbBtn("hollow-centre", "Make sure centre of " + this.objectType + " is filled with air", this.hollowCentre, "Make sure the centre of your " + this.objectType + " is empty, this insures that you have a place to stand when creating the " + this.objectType + ".\n(NOTE: Only use this if you know the centre of your " + this.objectType + " is inside existing non-air/non-water blocks.)")}
         ${this.renderCbBtn("show-comments", "Show extra comments", this.showExtraComments)}
       </ul>
       ${this.renderNumInput("cmdBlockHeight", "Command block vertical height", this.cmdBlockHeight, this.vMax * -1, this.vMax, [this._warningMsgs.cmdBlockHeight], "The altitude command blocks are placed so they don't interfear with other blocks when they are set and removed")}
@@ -2778,7 +2778,7 @@ __decorateClass([
 ], MinecraftSphere.prototype, "hollowCentre", 2);
 __decorateClass([
   e$2({ reflect: true, type: String })
-], MinecraftSphere.prototype, "objecType", 2);
+], MinecraftSphere.prototype, "objectType", 2);
 __decorateClass([
   e$2({ reflect: true, type: Number })
 ], MinecraftSphere.prototype, "stopAngle", 2);
