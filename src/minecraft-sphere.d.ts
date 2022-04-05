@@ -63,7 +63,9 @@ export interface IRotation {
   /** Angle of horizontal rotation */
   horizontal: number,
   /** Angle of vertical rotation */
-  vertical: number
+  vertical: number,
+  /** When creating cylinders, this increments the movement */
+  nextStep: number
 }
 
 export interface ICmdReturn {

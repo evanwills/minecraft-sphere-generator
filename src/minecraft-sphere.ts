@@ -4,7 +4,7 @@ import { repeat } from 'lit/directives/repeat.js';
 // import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { IBlockType, ICmdReturn, ICoodinates, IOneOffCmds, IRotation, IWarnings } from './minecraft-sphere.d';
-import { ucFirst, makePos, normalise, coordStr } from './utilities';
+import { ucFirst, makePos, normalise, coordStr, ceil3, r3, r } from './utilities';
 
 
 // block list source V1.16:
@@ -1270,22 +1270,15 @@ export class MinecraftSphere extends LitElement {
    * @returns {IRotation} The horizontal & vertical rotations to use
    *                      after setting every (inner) block
    */
-  private _getRotation(floor: boolean = true) : IRotation {
-    const _vert = (50 / this.radius);
-    // const _base = 1 / (2 * Math.PI * this.radius * 1.5);
-    const _hori = (Math.pow(_vert, 2) / 360);
+  private _getRotation() : IRotation {
+    // const _vert = (50 / this.radius);
+    const _vert = (300 / (2 * Math.PI * this.radius));
 
-    if (floor === true) {
       return {
-        horizontal: (Math.floor(_vert * 10000) / 10000),
-        vertical: (Math.floor(_hori * 10000) / 10000)
+        horizontal: ceil3(_vert),
+        vertical: ceil3(Math.pow(_vert, 2) / 360),
+        nextStep: ceil3(_vert / 360)
       };
-    } else {
-      return {
-        horizontal: (Math.ceil(_vert * 10000) / 10000),
-        vertical: (Math.ceil(_hori * 10000) / 10000)
-      };
-    }
   }
 
   /**
@@ -1295,8 +1288,8 @@ export class MinecraftSphere extends LitElement {
    */
   private _getFirstBlock() : ICoodinates {
     return {
-      x: Math.ceil(this.centreX + this.radius * 0.75),
-      y: Math.ceil(this.centreY + this.radius * 0.75),
+      x: ceil3(this.centreX + this.radius * 0.75),
+      y: ceil3(this.centreY + this.radius * 0.75),
       z: this.vMax - 3
     };
   }
@@ -1309,9 +1302,9 @@ export class MinecraftSphere extends LitElement {
    */
   private _getCentre() : ICoodinates {
     return {
-      x: Math.round(this.centreX) + 0.5,
-      y: Math.round(this.centreY) + 0.5,
-      z: Math.round(this.centreZ)
+      x: r3(this.centreX) + 0.5,
+      y: r3(this.centreY) + 0.5,
+      z: r3(this.centreZ)
     };
   }
 
@@ -1383,7 +1376,7 @@ export class MinecraftSphere extends LitElement {
           y: _y
         }) +
         ' minecraft:' + _chain + 'command_block' +
-        '[facing=south]' + '{Command:"[[CMD]]"' + _auto + '}\n',
+        '[facing=south]' + '{Command:"[[CMD]]"' + _auto + '} replace\n',
         _chain
       );
       console.log('_y:', _y);
@@ -1402,7 +1395,7 @@ export class MinecraftSphere extends LitElement {
     }
 
     output = cmntPrefix +
-             'Teleport to just near where all the command blocks will\n' +
+                'Teleport to just near where all the command blocks will\n' +
              '// be set, so you can see what\'s going on with the command\n' +
              '// blocks\n\n' +
              'tp @p' + coordStr({x: (firstBlock.x - 2), y: (firstBlock.y - 2), z: firstBlock.z}) +
@@ -1416,6 +1409,7 @@ export class MinecraftSphere extends LitElement {
     _x = firstBlock.x + 1;
     const _first = _x;
 
+    _auto = '';
     for (let a = 0; a < commands.length; a += 1) {
       const tmp = this._getCmdCmnt(
         commands[a],
@@ -1425,7 +1419,7 @@ export class MinecraftSphere extends LitElement {
           x: _x
         }) +
         ' minecraft:chain_command_block' +
-        '[facing=east]' + '{Command:"[[CMD]]",auto:1}\n'
+        '[facing=east]' + '{Command:"[[CMD]]"' + _auto + '} replace\n'
       );
 
       output += tmp.output;
@@ -1434,6 +1428,9 @@ export class MinecraftSphere extends LitElement {
       }
 
       _x += tmp.count;
+      if (tmp.count > 0) {
+        _auto = ',auto:1';
+      }
     }
 
     let _len = (_first > _x)
@@ -1449,7 +1446,7 @@ export class MinecraftSphere extends LitElement {
     // generate clone commands
     for (let a = 1; a < totalRepeats; a *= 2) {
       output += (this.showExtraComments)
-        ? '\n\n// Iteration: ' + a + ' (' + _len + ' blocks)\n'
+        ? '\n\n// Iteration: ' + a + ' (clone ' + _len + ' blocks | ' + (_len * 2) + ' blocks total)\n'
         : '\n'
       output += prefix + 'clone' + coordStr({
         ...firstBlock,
@@ -1483,20 +1480,22 @@ export class MinecraftSphere extends LitElement {
                 ...firstBlock,
                 y: (firstBlock.y + 1)
               }) +
-              ' minecraft:redstone_block\n';
+              ' minecraft:redstone_block replace\n';
 
     output += '\n\n\n' + cmntPrefix.replace(/-/g, '=') + '' +
               'Manually stop (remove all command and redstone blocks)' +
               '\n\n' + prefix + 'fill' +
               coordStr({
-                ...firstBlock,
-                x: _x
+                x: r(_x),
+                y: r(firstBlock.y),
+                z: r(firstBlock.z)
               }) +
               coordStr({
-                ...firstBlock,
-                y: _y
+                x: r(firstBlock.x),
+                y: r(_y),
+                z: r(firstBlock.z)
               }) +
-              ' minecraft:air\n';
+              ' minecraft:air replace\n';
 
     // output =
 
@@ -1534,11 +1533,11 @@ export class MinecraftSphere extends LitElement {
         '// TP to the centre of the sphere, facing up, so you\'re in\n' +
         '// the right spot and facing the right direction to start\n' +
         '// generating the sphere.',
-        '/execute at @p run tp @p' + coordStr(centre) +
+        '/execute at @p rdsdun tp @p' + coordStr(centre) +
         ' facing' + coordStr({...centre, z: 320}),
         '// Set the redstone block that starts the sphere generation',
         '/setblock' + coordStr({...firstBlock, x: firstBlock.x}) + ' ' +
-        'minecraft:redstone_block'
+        'minecraft:redstone_block replace'
       ],
       last: [],
       end: 'unless ' + {...centre, z: centre.z as number - this.radius}
@@ -1556,7 +1555,7 @@ export class MinecraftSphere extends LitElement {
           x: _fillCentre.x + 1,
           y: _fillCentre.y + 1,
           z: _fillCentre.z + 2
-        }) + ' minecraft:air',
+        }) + ' minecraft:air replace',
         ...oneoffs.first
       ]
     }
@@ -1576,8 +1575,8 @@ export class MinecraftSphere extends LitElement {
       // Set a block for every level of thickness in the sphere
       cmds.push(
         msg,
-        '/execute at @p run setblock ^ ^ ^' + (this.radius - a) + ' minecraft:' +
-        this.blockTypeID
+        '/execute at @p run setblock ^ ^ ^' + (this.radius - a) +
+        ' minecraft:' + this.blockTypeID + ' replace'
       );
     }
     if (this.fillWithAir === true) {
@@ -1586,7 +1585,7 @@ export class MinecraftSphere extends LitElement {
           '// TP back to the previous location to make sure you ' +
           'haven\'t fallen below the appropriate point',
           '/execute at @p run tp @p' + coordStr(centre) + ' ~ ~',
-          '/execute at @p run setblock ^ ^ ^' + a + ' minecraft:air'
+          '/execute at @p run setblock ^ ^ ^' + a + ' minecraft:air replace'
         );
       }
     }
@@ -1642,8 +1641,9 @@ export class MinecraftSphere extends LitElement {
         coordStr({ x: centre.x + 1, y: centre.y + 1, z: centre.z + this.length + _one }) + ' minecraft:air',
         '// Set a block that limits the upwards movement of the user to the \n' +
         '// height of the cylinder',
-        '/setblock' + coordStr({ ...centre, z: centre.z + this.length + _one }) + ' minecraft:stone',
-        // TP to the centre of the cylinder, facing east
+        '/setblock' + coordStr({ ...centre, z: centre.z + this.length + _one })
+        + ' minecraft:stone replace',
+        '// TP to the centre of the cylinder, facing east. (Where we\'re going to set the first block.)',
         '/execute at @p run tp @p' + coordStr(centre) +
         ' facing' + coordStr({...centre, x: centre.x + this.radius})
       ],
@@ -1655,8 +1655,8 @@ export class MinecraftSphere extends LitElement {
       // Set a block for every level of thickness in the cylinder
       cmds.push(
         '// Set another layer in the thickness of the sphere',
-        '/execute at @p run setblock ^ ^ ^' + (this.radius - a) + ' minecraft:' +
-        this.blockTypeID
+        '/execute at @p run setblock ^ ^ ^' + (this.radius - a) +
+        ' minecraft:' + this.blockTypeID + ' replace'
       );
     }
 
@@ -1665,17 +1665,16 @@ export class MinecraftSphere extends LitElement {
         cmds.push(
           '// TP back to the previous location to make sure you ' +
           'haven\'t fallen below the appropriate point',
-          '/execute at @p run setblock ^ ^ ^' + a + ' minecraft:air'
+          '/execute at @p run setblock ^ ^ ^' + a + ' minecraft:air replace'
         );
       }
     }
-    const _up = Math.round(1 / (2 * Math.PI * this.radius) * 10000) / 10000
-
     cmds.push(
-      '// rotate so we can start setting more blocks on the outside of\n' +
-      '// the cylinder',
-      '/execute at @p run tp @p' + coordStr({...centre, z: '~' + _up}) + ' ~' +
-      rotation.horizontal + ' ~'
+      '// Rotate so we can start setting more blocks on the outside\n' +
+      '// of the cylinder',
+      '/execute at @p run tp @p' +
+      coordStr({ ...centre, z: '~' + rotation.nextStep }) +
+      ' ~' + rotation.horizontal + ' ~'
     );
 
     return this._generateSetBlocks(cmds, oneoffs);

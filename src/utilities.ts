@@ -49,3 +49,36 @@ export const coordStr = (coordinates : ICoodinatesBase) : string => {
          ' ' + coordinates.z.toString() +
          ' ' + coordinates.y.toString();
 }
+
+/**
+ * Round up number to 3 decimal places
+ *
+ * @param input Number to be rounded up
+ *
+ * @returns rounded up number
+ */
+export const ceil3 = (input: number) : number => {
+  return (Math.ceil(input * 10000) / 10000);
+}
+
+/**
+ * Round number to 3 decimal places
+ *
+ * @param input Number to be rounded
+ *
+ * @returns rounded number
+ */
+export const r3 = (input: number) : number => {
+  return (Math.round(input * 10000) / 10000);
+}
+
+/**
+ * Round number to an integer
+ *
+ * @param input Number to be rounded
+ *
+ * @returns rounded number
+ */
+export const r = (input: number) : number => {
+  return Math.round(input);
+}
