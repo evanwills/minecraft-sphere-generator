@@ -632,10 +632,10 @@ export class MinecraftSphere extends LitElement {
   thickness : number = 1;
 
   /**
-   * The height of a cylinder
+   * The length/height of a cylinder
    */
   @property({ reflect: true, type: Number })
-  height : number = 1;
+  length : number = 1;
 
   /**
    * The human readable label for the block type to be used to build
@@ -754,7 +754,7 @@ export class MinecraftSphere extends LitElement {
     y: '',
     z: '',
     thickness: '',
-    height: '',
+    length: '',
     stopAngle: '',
     cmdBlockHeight: ''
   };
@@ -800,6 +800,9 @@ export class MinecraftSphere extends LitElement {
       --txt-colour: #fff;
       --bg-colour: #2d2b2b;
       --h-font: Arial, Helvetica, sans-serif;
+
+      --outline: 0.25rem dotted var(--txt-colour);
+      --outline-offset: 0.2rem;
     }
 
     h1, h2, h3, h4, h5, h6 {
@@ -816,7 +819,7 @@ export class MinecraftSphere extends LitElement {
       box-sizing: border-box;
       justify-content: space-between;
       margin: 0.5em 0;
-      overflow: hidden;
+      /* overflow: hidden; */
       padding: 0.1rem 0.3rem;
       position: relative;
     }
@@ -844,7 +847,15 @@ export class MinecraftSphere extends LitElement {
       position: relative;
       text-align: center;
       transition: color var(--ease) var(--timing) background-color var(--ease) var(--timing);
-      width: calc(100% - 1rem);
+      width: calc(100% - 2.2rem);
+    }
+    .radio-grp__label:hover {
+      cursor: pointer
+    }
+    .radio-grp__input:focus + .radio-grp__label,
+    .radio-grp__label:focus {
+      outline: var(--outline);
+      outline-offset: var(--outline-offset);
     }
     .radio-grp__label::after {
       background-color: var(--bg-colour);
@@ -958,7 +969,8 @@ export class MinecraftSphere extends LitElement {
       content: "\\02713";
     }
     .cb-btn__input:focus + .cb-btn__label {
-      outline: 0.15rem dotted var(--txt-colour);
+      outline: var(--outline);
+      outline-offset: var(--outline-offset);
     }
     .list-clean {
       margin: 0;
@@ -1074,7 +1086,7 @@ export class MinecraftSphere extends LitElement {
       y: '',
       z: '',
       thickness: '',
-      height: '',
+      length: '',
       stopAngle: '',
       cmdBlockHeight: ''
     };
@@ -1185,16 +1197,16 @@ export class MinecraftSphere extends LitElement {
    */
   private _init() : void {
     if (this._doInit) {
-      console.group('_init()')
-      console.log('doing INIT');
-      console.log('this.blockTypeLabel:', this.blockTypeLabel)
+      // console.group('_init()')
+      // console.log('doing INIT');
+      // console.log('this.blockTypeLabel:', this.blockTypeLabel);
       this._doInit = false;
       this._doSphere = (this.outputMode !== 3);
       this._setWarnings();
       if (this.blockTypeLabel !== '') {
         this._filterBlockListInner(this.blockTypeLabel);
       }
-      console.groupEnd()
+      // console.groupEnd();
     }
   }
 
@@ -1251,29 +1263,55 @@ export class MinecraftSphere extends LitElement {
   /**
    * Get the horizontal & vertical rotion angles
    *
-   * @param {number}  radius The radius of the sphere/cylinder
    * @param {boolean} floor  Whether or not to use floor or ceil to
    *                         round the output values
    *
    * @returns {IRotation} The horizontal & vertical rotations to use
    *                      after setting every (inner) block
    */
-  private _getRotation(radius : number, floor: boolean = true) : IRotation {
-    if (floor === true) {
-      const horizontal = (Math.floor((50 / radius) * 10000) / 10000);
+  private _getRotation(floor: boolean = true) : IRotation {
+    const _vert = (50 / this.radius);
+    // const _base = 1 / (2 * Math.PI * this.radius * 1.5);
+    const _hori = (Math.pow(_vert, 2) / 360);
 
+    if (floor === true) {
       return {
-        horizontal: horizontal,
-        vertical: (Math.floor(((horizontal * horizontal) / 360) * 10000) / 10000)
+        horizontal: (Math.floor(_vert * 10000) / 10000),
+        vertical: (Math.floor(_hori * 10000) / 10000)
       };
     } else {
-      const horizontal = (Math.ceil((50 / radius) * 10000) / 10000);
-
       return {
-        horizontal: horizontal,
-        vertical: (Math.ceil(((horizontal * horizontal) / 360) * 10000)/10000)
+        horizontal: (Math.ceil(_vert * 10000) / 10000),
+        vertical: (Math.ceil(_hori * 10000) / 10000)
       };
     }
+  }
+
+  /**
+   * Get the x, y & z coordinates for the first command block
+   *
+   * @returns Coordinates for the first command block
+   */
+  private _getFirstBlock() : ICoodinates {
+    return {
+      x: Math.ceil(this.centreX + this.radius * 0.75),
+      y: Math.ceil(this.centreY + this.radius * 0.75),
+      z: this.vMax - 3
+    };
+  }
+
+  /**
+   * Get the x, y & z coordinates for the centre of the sphere or
+   * centre of the start of the cylinder
+   *
+   * @returns
+   */
+  private _getCentre() : ICoodinates {
+    return {
+      x: Math.round(this.centreX) + 0.5,
+      y: Math.round(this.centreY) + 0.5,
+      z: Math.round(this.centreZ)
+    };
   }
 
   /**
@@ -1303,11 +1341,11 @@ export class MinecraftSphere extends LitElement {
    *          for.
    */
   private _generateSetBlocks(
-    firstBlock : ICoodinates,
     commands : Array<string>,
-    totalRepeats : number,
     oneoffs : IOneOffCmds = { first: [], last: [], end: '' }
   ) : string {
+    const firstBlock : ICoodinates = this._getFirstBlock();
+    const totalRepeats = 2 * Math.PI * this.radius * 1.4;
     const prefix = '';
     // const prefix = '/';
     const cmntPrefix : string = '// ------------------------------' +
@@ -1467,22 +1505,11 @@ export class MinecraftSphere extends LitElement {
    *
    * @returns {string} List of commands to run in Minecraft
    */
-  private _generateSphere(
-    centre : ICoodinates,
-    radius : number,
-    thickness : number,
-    blockTypeID : string,
-    fillWithAir: boolean = false,
-    hollowCentre : boolean = false,
-    stopAngle : number = 180
-  ) : string {
-    const rotation = this._getRotation(radius);
+  private _generateSphere() : string {
+    const centre = this._getCentre();
+    const rotation = this._getRotation();
     const cmds : Array<string> = [];
-    const firstBlock : ICoodinates = {
-      x: Math.ceil(centre.x + radius * 0.75),
-      y: Math.ceil(centre.y + radius * 0.75),
-      z: this.vMax - 3
-    }
+    const firstBlock : ICoodinates = this._getFirstBlock()
     const oneoffs : IOneOffCmds = {
       first: [
         '// TP to the centre of the sphere, facing up, so you\'re in\n' +
@@ -1495,10 +1522,10 @@ export class MinecraftSphere extends LitElement {
         'minecraft:redstone_block'
       ],
       last: [],
-      end: 'unless ' + {...centre, z: centre.z as number - radius}
+      end: 'unless ' + {...centre, z: centre.z as number - this.radius}
     };
 
-    if (hollowCentre === true) {
+    if (this.hollowCentre === true) {
       oneoffs.first = [
         '// Make sure the centre of where you\'re building your ' +
            'object is only air',
@@ -1507,9 +1534,9 @@ export class MinecraftSphere extends LitElement {
       ]
     }
 
-    for (let a = 0, c = thickness; c > 0; c -= 1, a += 1) {
+    for (let a = 0, c = this.thickness; c > 0; c -= 1, a += 1) {
       let msg = '// Set the outer a block for the outer layer of the sphere';
-      if (a > 0 && thickness > 1) {
+      if (a > 0 && this.thickness > 1) {
         cmds.push(
           '// TP back to the previous location to make sure you ' +
           'haven\'t fallen below the appropriate point',
@@ -1522,12 +1549,12 @@ export class MinecraftSphere extends LitElement {
       // Set a block for every level of thickness in the sphere
       cmds.push(
         msg,
-        '/execute at @p run setblock ^ ^ ^' + (radius - a) + ' minecraft:' +
-        blockTypeID
+        '/execute at @p run setblock ^ ^ ^' + (this.radius - a) + ' minecraft:' +
+        this.blockTypeID
       );
     }
-    if (fillWithAir === true) {
-      for (let a = radius - thickness; a > 0; a -= 1) {
+    if (this.fillWithAir === true) {
+      for (let a = this.radius - this.thickness; a > 0; a -= 1) {
         cmds.push(
           '// TP back to the previous location to make sure you ' +
           'haven\'t fallen below the appropriate point',
@@ -1544,7 +1571,7 @@ export class MinecraftSphere extends LitElement {
       rotation.horizontal + ' ~' + rotation.vertical
     );
 
-    return this._generateSetBlocks(firstBlock, cmds, radius * radius, oneoffs);
+    return this._generateSetBlocks(cmds, oneoffs);
   }
 
 
@@ -1574,50 +1601,56 @@ export class MinecraftSphere extends LitElement {
    * @returns {string} List of commands to run in Minecraft
    */
   private _generateCylinder(
-    centre : ICoodinates,
-    radius : number,
-    thickness : number,
-    blockTypeID : string,
-    fillWithAir: boolean = false,
-    hollowCentre : boolean = false,
-    length: number = 0,
-    zAngle: number = 0,
-    xyAngle: number = 0
   ) : string {
-    const rotation = this._getRotation(radius);
+    const centre = this._getCentre();
+    const rotation = this._getRotation();
     const cmds : Array<string> = [];
+    const _one = (this.length < 0)
+      ? -1
+      : 1
     const oneoffs : IOneOffCmds = {
       first: [
+        '// Make sure we have space to move so we can generate the cylinder',
+        '/fill' + coordStr({ x: centre.x - 1, y: centre.y - 1, z: centre.z - _one }) +
+        coordStr({ x: centre.x + 1, y: centre.y + 1, z: centre.z + this.length + _one }) + ' minecraft:air',
+        '// Set a block that limits the upwards movement of the user to the \n' +
+        '// height of the cylinder',
+        '/setblock' + coordStr({ ...centre, z: centre.z + this.length + _one }) + ' minecraft:stone',
         // TP to the centre of the cylinder, facing east
         '/execute at @p run tp @p' + coordStr(centre) +
-        ' facing' + coordStr({...centre, x: centre.x + radius})
+        ' facing' + coordStr({...centre, x: centre.x + this.radius})
       ],
       last: [],
       end: ''
     };
 
-    for (let a = 0, c = thickness; a >= 0; a -= 1) {
-      // Set a block for every level of thickness in the sphere
+    for (let a = 0, c = this.thickness; c > 0; c -= 1, a += 1) {
+      // Set a block for every level of thickness in the cylinder
       cmds.push(
-        '/execute at @p run setblock ^ ^ ^' + c + ' minecraft:' +
-        blockTypeID,
-        // TP back to the previous location to make sure you haven't
-        // fallen below the appropriate point
-        '/execute at @p run tp @p' + coordStr(centre) + ' ~ ~'
+        '// Set another layer in the thickness of the sphere',
+        '/execute at @p run setblock ^ ^ ^' + (this.radius - a) + ' minecraft:' +
+        this.blockTypeID
       );
     }
+
+    if (this.fillWithAir === true) {
+      for (let a = this.radius - this.thickness; a > 0; a -= 1) {
+        cmds.push(
+          '// TP back to the previous location to make sure you ' +
+          'haven\'t fallen below the appropriate point',
+          '/execute at @p run setblock ^ ^ ^' + a + ' minecraft:air'
+        );
+      }
+    }
+
     cmds.push(
+      '// rotate so we can start setting more blocks on the outside of\n' +
+      '// the cylinder',
       '/execute at @p run tp @p' + coordStr({...centre, z: '~1'}) + ' ~ ~' +
       rotation.horizontal + ' ~'
     );
 
-    const firstBlock : ICoodinates = {
-      x: centre.x + radius / 2,
-      y: centre.y + radius / 2,
-      z: this.vMax - 3
-    }
-
-    return this._generateSetBlocks(firstBlock, cmds, 36, oneoffs);
+    return this._generateSetBlocks(cmds, oneoffs);
   }
 
   /**
@@ -1739,6 +1772,11 @@ export class MinecraftSphere extends LitElement {
         changed = true;
         break;
 
+      case 'length':
+        this.length = makePos(val);
+        changed = true;
+        break;
+
       case 'ignore-warnings':
         this.ignoreWarnings = input.checked;
         break;
@@ -1775,7 +1813,7 @@ export class MinecraftSphere extends LitElement {
     if (changed === true) {
       this._setWarnings();
     }
-    console.log('this:', this)
+    // console.log('this:', this)
   }
 
   //  END:  Event handlers
@@ -1966,9 +2004,9 @@ export class MinecraftSphere extends LitElement {
       )}
       ${(this._doSphere === false)
         ? this.renderNumInput(
-          'height', 'Cylinder height',
-          this.height, 1, (tmp > 1) ? tmp : 1,
-          [this._warningMsgs.height])
+          'length', 'Cylinder length',
+          this.length, 1, (tmp > 1) ? tmp : 1,
+          [this._warningMsgs.length])
         : this.renderNumInput(
           'stop-angle',
           'Stop angle for sphere (180 = full sphere)',
@@ -2034,29 +2072,10 @@ export class MinecraftSphere extends LitElement {
    *                           (and instructions) the user needs
    */
   renderCode() : TemplateResult {
-    const _centre = {
-      x : this.centreX,
-      y: this.centreY,
-      z: this.centreZ};
-
     return html`
       <textarea>${(this._doSphere)
-        ? this._generateSphere(
-            _centre,
-            this.radius,
-            this.thickness,
-            this.blockTypeID,
-            this.fillWithAir,
-            this.hollowCentre,
-            this.stopAngle
-          )
-        : this._generateCylinder(
-            _centre,
-            this.radius,
-            this.thickness,
-            this.blockTypeID,
-            this.height
-          )
+        ? this._generateSphere()
+        : this._generateCylinder()
       }</textarea>
       <button id="modify"
               value="1"
@@ -2073,7 +2092,7 @@ export class MinecraftSphere extends LitElement {
   render() : TemplateResult {
     this._init();
 
-    console.log('this.warningCount:', this._warningCount);
+    // console.log('this.warningCount:', this._warningCount);
 
     return html`
       <h1>Minecraft sphere (& cylinder) code generator</h1>

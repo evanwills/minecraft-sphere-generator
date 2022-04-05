@@ -26,8 +26,8 @@ export interface IWarnings {
   z: string,
   /** Error related to thickness of object */
   thickness: string,
-  /** Error related to height of cylinder */
-  height: string,
+  /** Error related to length/height of cylinder */
+  length: string,
   /** Error related to the stop angle of a sphere */
   stopAngle: string,
   cmdBlockHeight: string
