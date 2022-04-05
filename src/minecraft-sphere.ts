@@ -1354,7 +1354,7 @@ export class MinecraftSphere extends LitElement {
     // let cmdCount = 0;
     let _chain = '';
     let _x = 0;
-    let _y = firstBlock.y + 1;
+    let _y = firstBlock.y + 2;
     let _auto = '';
 
     // set one-off commands
