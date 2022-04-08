@@ -744,6 +744,20 @@ export class MinecraftSphere extends LitElement {
   @property({ reflect: true, type: Number })
   cmdBlockHeight : number = 317;
 
+  /**
+   * Modify the rate of movement to create spirals.
+   *
+   * Numbers between -1.25 & 1.25 will have little or no effect
+   *
+   * __NOTE:__ A negitave value will cause the spiral to travel
+   *           counter clockwise
+   *
+   * __NOTE ALSO:__ numbers between -1 & 1 will always be converted
+   *           to 1
+   */
+  @property({ reflect: true, type: Number })
+  modifier : number = 1;
+
   // ================================================================
   // START: Private poperties & state
 
@@ -757,7 +771,8 @@ export class MinecraftSphere extends LitElement {
     thickness: '',
     length: '',
     stopAngle: '',
-    cmdBlockHeight: ''
+    cmdBlockHeight: '',
+    modifier: ''
   };
 
   @state()
@@ -1089,7 +1104,8 @@ export class MinecraftSphere extends LitElement {
       thickness: '',
       length: '',
       stopAngle: '',
-      cmdBlockHeight: ''
+      cmdBlockHeight: '',
+      modifier: ''
     };
 
     if (this._doSphere === true) {
@@ -1120,6 +1136,10 @@ export class MinecraftSphere extends LitElement {
       this.radiusError = _tmp;
       this._warningMsgs.general.push(_getGid() + _tmp);
       _eCount += 1
+    }
+
+    if (this.modifier < 1 && this.modifier > -1) {
+      this.modifier = 1;
     }
 
     _point = (x > 0)
@@ -1273,12 +1293,16 @@ export class MinecraftSphere extends LitElement {
   private _getRotation() : IRotation {
     // const _vert = (50 / this.radius);
     const _vert = (300 / (2 * Math.PI * this.radius));
+    const _one = this.modifier < 0
+      ? -1
+      : 1;
+    const _mod = this.modifier * _one
 
-      return {
-        horizontal: ceil3(_vert),
-        vertical: ceil3(Math.pow(_vert, 2) / 360),
-        nextStep: ceil3(_vert / 360)
-      };
+    return {
+      horizontal: ceil3(_vert) * _one,
+      vertical: ceil3(Math.pow(_vert, 2) / 360) * _mod,
+      nextStep: ceil3(_vert / 360) * _mod
+    };
   }
 
   /**
@@ -1288,8 +1312,8 @@ export class MinecraftSphere extends LitElement {
    */
   private _getFirstBlock() : ICoodinates {
     return {
-      x: ceil3(this.centreX + this.radius * 0.75),
-      y: ceil3(this.centreY + this.radius * 0.75),
+      x: Math.ceil(this.centreX + this.radius * 0.75),
+      y: Math.ceil(this.centreY + this.radius * 0.75),
       z: this.vMax - 3
     };
   }
@@ -1364,6 +1388,12 @@ export class MinecraftSphere extends LitElement {
     let _x = 0;
     let _y = firstBlock.y + 2;
     let _auto = '';
+
+    oneoffs.first.push(
+      '// Set the redstone block that starts the actual generation',
+      '/setblock' + coordStr(firstBlock) + ' ' +
+      'minecraft:redstone_block replace'
+    );
 
     // set one-off commands
     // (used for moving to the correct spot to start building the sphere)
@@ -1527,17 +1557,13 @@ export class MinecraftSphere extends LitElement {
     const _fillCentre = this._getFillCentre();
     const rotation = this._getRotation();
     const cmds : Array<string> = [];
-    const firstBlock : ICoodinates = this._getFirstBlock()
     const oneoffs : IOneOffCmds = {
       first: [
         '// TP to the centre of the sphere, facing up, so you\'re in\n' +
         '// the right spot and facing the right direction to start\n' +
         '// generating the sphere.',
-        '/execute at @p rdsdun tp @p' + coordStr(centre) +
-        ' facing' + coordStr({...centre, z: 320}),
-        '// Set the redstone block that starts the sphere generation',
-        '/setblock' + coordStr({...firstBlock, x: firstBlock.x}) + ' ' +
-        'minecraft:redstone_block replace'
+        '/execute at @p tp @p' + coordStr(centre) +
+        ' facing' + coordStr({...centre, z: 320})
       ],
       last: [],
       end: 'unless ' + {...centre, z: centre.z as number - this.radius}
@@ -1634,15 +1660,20 @@ export class MinecraftSphere extends LitElement {
     const _one = (this.length < 0)
       ? -1
       : 1
+    const _r = (this.radius / 2);
     const oneoffs : IOneOffCmds = {
       first: [
         '// Make sure we have space to move so we can generate the cylinder',
         '/fill' + coordStr({ x: centre.x - 1, y: centre.y - 1, z: centre.z - _one }) +
         coordStr({ x: centre.x + 1, y: centre.y + 1, z: centre.z + this.length + _one }) + ' minecraft:air',
-        '// Set a block that limits the upwards movement of the user to the \n' +
+        '// Set a blocks that limit the upwards movement of the user to the \n' +
         '// height of the cylinder',
-        '/setblock' + coordStr({ ...centre, z: centre.z + this.length + _one })
-        + ' minecraft:stone replace',
+        // '/setblock' + coordStr({ ...centre, z: centre.z + this.length + _one })
+        // + ' minecraft:stone replace',
+        '/fill' +
+        coordStr({ x: Math.round(centre.x + _r), y: Math.round(centre.y + _r), z: centre.z - _one }) +
+        coordStr({ x: Math.round(centre.x - _r), y: Math.round(centre.y - _r), z: centre.z + (this.length * _one) }) +
+        ' minecraft:' + this.blockTypeID,
         '// TP to the centre of the cylinder, facing east. (Where we\'re going to set the first block.)',
         '/execute at @p run tp @p' + coordStr(centre) +
         ' facing' + coordStr({...centre, x: centre.x + this.radius})
@@ -1835,6 +1866,16 @@ export class MinecraftSphere extends LitElement {
       case 'modify':
         this._showCode = false;
         break;
+
+      case 'modifier':
+        this.modifier = (this.modifier < 0)
+          ? (this.modifier > -1)
+            ? -1
+            : this.modifier
+          : (this.modifier < 1)
+            ? 1
+            : this.modifier;
+        break;
     }
 
     if (changed === true) {
@@ -1929,19 +1970,31 @@ export class MinecraftSphere extends LitElement {
   /**
    * Get a numeric input filed & label
    *
-   * @param {string} id          ID of the input field
-   * @param {label}  label       Label for the input field
-   * @param {number} value       Value for the input field
-   * @param {number} min         Minimum allowed value for the field
-   * @param {number} max         Maximum allowed value for the field
-   * @param {number} warnings    Warning message for this field
-   * @param {string} description Helpful info about the purpose of
-   *                             the field
+   * @param {string}           id          ID of the input field
+   * @param {label}            label       Label for the input field
+   * @param {number}           value       Value for the input field
+   * @param {number}           min         Minimum allowed value for
+   *                                       the field
+   * @param {number}           max         Maximum allowed value for
+   *                                       the field
+   * @param {number}           warnings    Warning message for this
+   *                                       field
+   * @param {string}           description Helpful info about the
+   *                                       purpose of the field
+   * @param {nubmer|undefined} step        minimum increment allowed
+   *                                       for number value
    *
    * @returns {TemplateResult}
    */
   renderNumInput(
-    id: string, label: string, value: number, min: number, max: number, warnings : Array<string>, description: string = ''
+    id: string,
+    label: string,
+    value: number,
+    min: number,
+    max: number,
+    warnings : Array<string>,
+    description: string|TemplateResult = '',
+    step: number|undefined = 1
   ) : TemplateResult {
     return html`
       ${this.renderWarnings(warnings)}
@@ -1953,7 +2006,7 @@ export class MinecraftSphere extends LitElement {
               .value="${value}"
                min="${min}"
                max="${max}"
-               step="1"
+               step="${ifDefined(step)}"
               @change=${this.changeHandler} />
         ${(description !== '')
           ? html`<span class="input__desc">${description}</span>`
@@ -2010,8 +2063,8 @@ export class MinecraftSphere extends LitElement {
           <datalist id="block-type-options">
             ${repeat(
               this._filteredBlocks,
-              (item) => item.id,
-              item => html`<option value="${item.label}">`
+              (item : IBlockType) => item.id,
+              (item : IBlockType) => html`<option value="${item.label}">`
             )}
           </datalist>
           `
@@ -2042,6 +2095,17 @@ export class MinecraftSphere extends LitElement {
           'The angle (from "straight up") when the sphere stops being generated. Used for creating domes and parts of a sphere'
         )
       }
+      ${this.renderNumInput(
+        'modifier', 'Spiral modifier',
+        this.modifier, -10, 10,
+        [this._warningMsgs.modifier],
+        html`
+        This alters the rate of climb to create spirals. <code>1</code> <em>[Default]</em> = no spiral<br />
+        <strong>NOTE:</strong> Numbers between -1.25 & 1.25 will have little or no effect.<br />
+        <strong>NOTE ALSO:</strong> Negative numbers will cause the spiral to go counter-clockwise<br />
+        <strong>FINAL NOTE:</strong> Numbers greater than -1 and less than 1 will be converted to -1 & 1 respectively.<br />`,
+        undefined
+      )}
 
       <h2>${obj} center coordinates</h2>
       ${this.renderNumInput(

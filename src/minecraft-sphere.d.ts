@@ -30,7 +30,8 @@ export interface IWarnings {
   length: string,
   /** Error related to the stop angle of a sphere */
   stopAngle: string,
-  cmdBlockHeight: string
+  cmdBlockHeight: string,
+  modifier: string
 }
 
 export interface ICoodinatesBase {
