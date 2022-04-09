@@ -6,6 +6,8 @@ Generate commands that can be used to generate spheres (and cylinders) of any di
 
 Without the very helpful information provided by [Henry Cat](https://www.youtube.com/channel/UCEhgXO2ijjwaNXsGce3Dv9A) in the video [How to Make a Sphere in Minecraft Using COMMANDS - Tutorial (Java Edition)](https://www.youtube.com/watch?v=VR-iD5HZzE0&t=102s) none of this would have been possible.
 
+see [Advanced Commands Tutorial - For/While Loops with Minecraft 1.12 Chains](https://www.youtube.com/watch?v=9yX7mhgIhs0) for how to use loops
+
 ## How the generator works:
 
 1. * Search for the type of block you wish to make your sphere out 
@@ -38,118 +40,156 @@ This component is in the early stages of development. I still need to do further
 
 ## Web component attributes
 
-### `blockTypeID`
+
+
+### `blocktypeid` - Block type id
 
 *{`string`}* &ndash; *[default: `''`]*
 
 Minecraft (Java) identifier for the block type
 
 
-### `blockTypeLabel`
+### `blocktypelabel` - Block type label
 
 *{`string`}* &ndash; *[default: `''`]*
 
 The human readable label for the block type to be used to build the sphere
 
 
-### `centreX`
+### `centrex` - Centre x
 
 *{`number`}* &ndash; *[default: `0`]*
 
 East/West coordinate for the centre of the sphere
 
 
-### `centreY`
+### `centrey` - Centre y
 
 *{`number`}* &ndash; *[default: `0`]*
 
 North/South coordinate for the centre of the sphere
 
 
-### `centreZ`
+### `centrez` - Centre z
 
 *{`number`}* &ndash; *[default: `0`]*
 
 Vertical coordinate for the centre of the sphere
 
 
-### `hMax`
+### `cmdblockheight` - Cmd block height
+
+*{`number`}* &ndash; *[default: `317`]*
+
+The vertical position where command blocks are placed so they don't interfear with other things
+
+
+### `fillwithair` - Fill with air
+
+*{`boolean`}* &ndash; *[default: `false`]*
+
+Whether or not to fill the object with air as it's being built
+
+
+### `hmax` - H max
 
 *{`number`}* &ndash; *[default: `9999`]*
 
 Assumed maximum east/west or north/south dimension of world
 
 
-### `height`
+### `hollowcentre` - Hollow centre
 
-*{`number`}* &ndash; *[default: `1`]*
+*{`boolean`}* &ndash; *[default: `false`]*
 
-The height of a cylinder
+Whether or not to fill the centre of the object with air before starting to generate the object
 
 
-### `ignoreWarnings`
+### `ignorewarnings` - Ignore warnings
 
 *{`boolean`}* &ndash; *[default: `false`]*
 
 Whether or not to render command block generator commands regardless of whether there are warnings
 
 
-### `objecType`
+### `length` - Length
+
+*{`number`}* &ndash; *[default: `1`]*
+
+The length/height of a cylinder
+
+
+### `modifier` - Modifier
+
+*{`number`}* &ndash; *[default: `1`]*
+
+Modify the rate of movement to create spirals. 
+
+> __NOTE:__ Numbers between -1.25 & 1.25 will have little or no effect
+
+> __NOTE ALSO:__ A negitave value will cause the spiral to travel
+            counter clockwise
+
+> __FINAL NOTE ALSO:__ numbers between -1 & 1 will always be converted
+                 to -1 or 1 to prevent the build slowing down.
+
+
+### `objecttype` - Object type
 
 *{`string`}* &ndash; *[default: `'sphere'`]*
 
 The type of object to be created.
 
 
-### `outputMode`
+### `outputmode` - Output mode
 
-*{`number`}* &ndash; *[default: `1`]*
+*{`number`}* &ndash; *[default: `2`]*
 
-What sort of output do we want from the generator 
+What sort of output do we want from the generator * Options are:
+* 1 = Sphere only
+* 2 = Either sphere or cylinder (sphere default)
+* 3 = Either sphere or cylinder (cylinder default)
+* 4 = Cylinder only
 
-Options are:
-   * 1 = Either sphere or cylinder
-   * 2 = Sphere only
-   * 3 = Cylinder only
 
-
-### `radius`
+### `radius` - Radius
 
 *{`number`}* &ndash; *[default: `0`]*
 
 The radius of the sphere/cylinder
 
 
-### `showExtraComments`
+### `showextracomments` - Show extra comments
 
 *{`boolean`}* &ndash; *[default: `false`]*
 
 Whether or not to show extra comments in output
 
 
-### `slowThreshold`
+### `slowthreshold` - Slow threshold
 
 *{`number`}* &ndash; *[default: `75`]*
 
 The size of the radius above which rendering the entire sphere might be very slow.
 
 
-### `stopAngle`
+### `stopangle` - Stop angle
 
-*{`number`}* &ndash; *[default: `-90`]*
+*{`number`}* &ndash; *[default: `180`]*
 
 The angle (from vertical *0*) at which the sphere is considered complete
 
 
-### `thickness`
+### `thickness` - Thickness
 
 *{`number`}* &ndash; *[default: `1`]*
 
 Thickness of the wall of the sphere/cylinder
 
 
-### `vMax`
+### `vmax` - V max
 
 *{`number`}* &ndash; *[default: `320`]*
 
 The maximum vertical distance from zero (either up or down)
+

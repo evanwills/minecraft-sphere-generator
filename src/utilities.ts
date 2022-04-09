@@ -51,34 +51,83 @@ export const coordStr = (coordinates : ICoodinatesBase) : string => {
 }
 
 /**
- * Round up number to 3 decimal places
+ * Get multiplier value for rounding number
  *
- * @param input Number to be rounded up
+ * @param places Number of decimal places number needs to be
+ *               rounded to
  *
- * @returns rounded up number
+ * @returns A value that a number can be multiplied by before
+ *          rounding then devided by after rounding to get the right
+ *          number of decimal places.
  */
-export const ceil3 = (input: number) : number => {
-  return (Math.ceil(input * 10000) / 10000);
+const _getPlaces = (places: number) : number => {
+  return (places === 0)
+    ? 1
+    : Math.pow(10, places);
 }
 
 /**
- * Round number to 3 decimal places
+ * Round number up to required number of decimal places
  *
- * @param input Number to be rounded
+ * @param input  Number to be rounded up
+ * @param places Decimal places to round to
  *
  * @returns rounded number
  */
-export const r3 = (input: number) : number => {
-  return (Math.round(input * 10000) / 10000);
+export const ceil =(input : number, places : number = 0) : number => {
+  const _places = _getPlaces(places);
+
+  console.group('ceil(' + input + ', ' + places + ')')
+  console.log('_places:', _places)
+  console.log('(input * _places):', (input * _places))
+  console.log('(input * _places) % 1:', (input * _places) % 1)
+  console.log('(((input * _places) % 1) > 0):', (((input * _places) % 1) > 0))
+  console.log('(Math.ceil(input * _places)  / _places):', (Math.ceil(input * _places)  / _places))
+  console.groupEnd()
+
+  return (Math.ceil(input * _places)  / _places);
 }
 
 /**
- * Round number to an integer
+ * Round number down to required number of decimal places
  *
- * @param input Number to be rounded
+ * @param input  Number to be rounded up
+ * @param places Decimal places to round to
  *
  * @returns rounded number
  */
-export const r = (input: number) : number => {
-  return Math.round(input);
+export const floor =(input : number, places : number = 0) : number => {
+  const _places = _getPlaces(places);
+
+  console.group('floor(' + input + ', ' + places + ')')
+  console.log('_places:', _places)
+  console.log('(input * _places):', (input * _places))
+  console.log('(input * _places) % 1:', (input * _places) % 1)
+  console.log('(((input * _places) % 1) > 0):', (((input * _places) % 1) > 0))
+  console.log('(Math.ceil(input * _places)  / _places):', (Math.ceil(input * _places)  / _places))
+  console.groupEnd()
+
+  return (Math.floor(input * _places)  / _places);
+}
+
+/**
+ * Round number to required number of decimal places
+ *
+ * @param input  Number to be rounded up
+ * @param places Decimal places to round to
+ *
+ * @returns rounded number
+ */
+export const round =(input : number, places : number = 0) : number => {
+  const _places = _getPlaces(places);
+
+  console.group('round(' + input + ', ' + places + ')')
+  console.log('_places:', _places)
+  console.log('(input * _places):', (input * _places))
+  console.log('(input * _places) % 1:', (input * _places) % 1)
+  console.log('(((input * _places) % 1) > 0):', (((input * _places) % 1) > 0))
+  console.log('(Math.ceil(input * _places)  / _places):', (Math.ceil(input * _places)  / _places))
+  console.groupEnd()
+
+  return (Math.round(input * _places)  / _places);
 }
